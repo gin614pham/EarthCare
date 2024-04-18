@@ -1,5 +1,12 @@
 import React from 'react';
+import {Text, View} from 'react-native';
 
-function App() {
-  return <div>App</div>;
+function App(): JSX.Element {
+  return (
+    <View>
+      <Text>Hello World</Text>
+    </View>
+  );
 }
+
+export default App;
