@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1066737501791",
+    "project_id": "earthcare-aoisora",
+    "storage_bucket": "earthcare-aoisora.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1066737501791:android:79227130ca09dde5b37dea",
+        "android_client_info": {
+          "package_name": "com.earthcare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBns0kQvh8ny100vkd86n4Nu7I9C3KkvLc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
