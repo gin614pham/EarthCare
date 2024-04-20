@@ -3,7 +3,7 @@ import {Text, View} from 'react-native';
 import MapboxGL from '@rnmapbox/maps';
 import Config from 'react-native-config';
 
-MapboxGL.setAccessToken(Config.MAPBOX_ACCESS_TOKEN2 || '');
+MapboxGL.setAccessToken(Config.MAPBOX_ACCESS_TOKEN || '');
 function App(): JSX.Element {
   return (
     <View style={{flex: 1}}>
