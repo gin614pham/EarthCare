@@ -1,15 +1,33 @@
 import React from 'react';
-import {Text, View} from 'react-native';
-import MapboxGL from '@rnmapbox/maps';
-import Config from 'react-native-config';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import useUserAuth from './hook/userAuth';
+import HomeScreen from './screens/HomeScreen';
+import LoginScreen from './screens/LoginScreen';
+import RegisterScreen from './screens/RegisterScreen';
+import {NavigationContainer} from '@react-navigation/native';
 
-MapboxGL.setAccessToken(Config.MAPBOX_ACCESS_TOKEN || '');
+const Stack = createNativeStackNavigator();
+
 function App(): JSX.Element {
-  return (
-    <View style={{flex: 1}}>
-      <MapboxGL.MapView style={{flex: 1}} />
-    </View>
-  );
+  const {user} = useUserAuth();
+  if (user) {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{headerShown: false}}>
+          <Stack.Screen name="Home" component={HomeScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  } else {
+    return (
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{headerShown: false}}>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Register" component={RegisterScreen} />
+        </Stack.Navigator>
+      </NavigationContainer>
+    );
+  }
 }
 
 export default App;
