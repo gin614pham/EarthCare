@@ -1,33 +1,25 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import useUserAuth from './hook/userAuth';
-import HomeScreen from './screens/HomeScreen';
-import LoginScreen from './screens/LoginScreen';
-import RegisterScreen from './screens/RegisterScreen';
 import {NavigationContainer} from '@react-navigation/native';
+import AuthNavigation from './navigation/AuthNavigation';
+import AppNavigation from './navigation/AppNavigation';
+import auth from '@react-native-firebase/auth';
 
 const Stack = createNativeStackNavigator();
 
 function App(): JSX.Element {
-  const {user} = useUserAuth();
-  if (user) {
-    return (
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{headerShown: false}}>
-          <Stack.Screen name="Home" component={HomeScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    );
-  } else {
-    return (
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{headerShown: false}}>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} />
-        </Stack.Navigator>
-      </NavigationContainer>
-    );
-  }
+  const [user, setUser] = useState(auth().currentUser);
+
+  useEffect(() => {
+    const unsubscribe = auth().onAuthStateChanged(setUser);
+    return unsubscribe;
+  }, []);
+
+  return (
+    <NavigationContainer>
+      {user ? AppNavigation() : AuthNavigation()}
+    </NavigationContainer>
+  );
 }
 
 export default App;

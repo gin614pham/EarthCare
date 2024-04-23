@@ -1,35 +1,20 @@
-import {onAuthStateChanged, User} from 'firebase/auth';
-import firebase from 'firebase/compat/app';
 import React, {useEffect} from 'react';
-import auth from '../api/firebase';
-import {initializeAuth} from 'firebase/auth';
-import ReactNativeAsyncStorage, {
-  AsyncStorageStatic,
-} from '@react-native-async-storage/async-storage';
+import auth from '@react-native-firebase/auth';
 
 const useUserAuth = () => {
-  const [user, setUser] = React.useState<User | null>(null);
+  const [user, setUser] = React.useState<any>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, user => {
-      if (user) {
+    setUser(auth().currentUser);
+    if (auth().currentUser) {
+      const unsubscribe = auth().onAuthStateChanged(user => {
         setUser(user);
-      } else {
-        setUser(null);
-      }
-    });
-    return unsubscribe;
+      });
+      return unsubscribe;
+    }
   }, []);
 
   return {user};
 };
 
 export default useUserAuth;
-function getReactNativePersistence(
-  ReactNativeAsyncStorage: AsyncStorageStatic,
-):
-  | import('@firebase/auth').Persistence
-  | import('@firebase/auth').Persistence[]
-  | undefined {
-  throw new Error('Function not implemented.');
-}
