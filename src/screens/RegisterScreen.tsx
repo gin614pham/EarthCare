@@ -3,6 +3,7 @@ import {Text, TextInput, TouchableOpacity, View, Alert} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import loginStyles from '../styles/loginStyle';
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 interface RegisterFormType {
   name: string;
@@ -21,10 +22,17 @@ const RegisterScreen = ({navigation}: any) => {
 
   const handleRegister = async () => {
     try {
-      const userCredentials = await auth().createUserWithEmailAndPassword(
-        registerForm.email,
-        registerForm.password,
-      );
+      const userCredentials = await auth()
+        .createUserWithEmailAndPassword(
+          registerForm.email,
+          registerForm.password,
+        )
+        .then(user => {
+          firestore().collection('users').doc(user.user.uid).set({
+            name: registerForm.name,
+            email: registerForm.email,
+          });
+        });
       Alert.alert('Success', 'Register success');
     } catch (error) {
       Alert.alert('Error', 'Register failed' + '\n' + error);
