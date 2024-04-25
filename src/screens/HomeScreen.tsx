@@ -5,10 +5,15 @@ import BottomSheet from '@gorhom/bottom-sheet';
 import ShowBottomSheetContext from '../context/ShowBottomSheetContext';
 
 const HomeScreen = () => {
-  const {bottomSheetStatus} = useContext(ShowBottomSheetContext);
   const snapPoints = useMemo(() => ['25%', '50%'], []);
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const context = useContext(ShowBottomSheetContext);
 
+  if (!context) {
+    return null;
+  }
+
+  const {bottomSheetStatus} = context;
   useEffect(() => {
     if (bottomSheetStatus) {
       bottomSheetRef.current?.expand();
