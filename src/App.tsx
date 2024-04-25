@@ -4,6 +4,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import AuthNavigation from './navigation/AuthNavigation';
 import AppNavigation from './navigation/AppNavigation';
 import auth from '@react-native-firebase/auth';
+import {GestureHandlerRootView} from 'react-native-gesture-handler';
 
 const Stack = createNativeStackNavigator();
 
@@ -16,9 +17,11 @@ function App(): JSX.Element {
   }, []);
 
   return (
-    <NavigationContainer>
-      {user ? AppNavigation() : AuthNavigation()}
-    </NavigationContainer>
+    <GestureHandlerRootView style={{flex: 1}}>
+      <NavigationContainer>
+        {user ? AppNavigation() : AuthNavigation()}
+      </NavigationContainer>
+    </GestureHandlerRootView>
   );
 }
 
