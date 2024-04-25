@@ -2,20 +2,9 @@ import React, {useContext, useEffect, useMemo, useRef} from 'react';
 import {View, Text, Button, Alert, StyleSheet} from 'react-native';
 import auth from '@react-native-firebase/auth';
 import BottomSheet from '@gorhom/bottom-sheet';
-import ShowBottomSheetContext from '../context/ShowBottomSheetContext';
-
 const HomeScreen = () => {
-  const {bottomSheetStatus} = useContext(ShowBottomSheetContext);
   const snapPoints = useMemo(() => ['25%', '50%'], []);
   const bottomSheetRef = useRef<BottomSheet>(null);
-
-  useEffect(() => {
-    if (bottomSheetStatus) {
-      bottomSheetRef.current?.expand();
-    } else {
-      bottomSheetRef.current?.close();
-    }
-  }, [bottomSheetStatus]);
 
   const signOut = () => {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [

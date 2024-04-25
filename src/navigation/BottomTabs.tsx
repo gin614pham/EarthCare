@@ -8,7 +8,6 @@ import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import SearchScreen from '../screens/SearchScreen';
 import ActivityScreen from '../screens/ActivityScreen';
-import ShowBottomSheetContext from '../context/ShowBottomSheetContext';
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -31,22 +30,6 @@ const CustomTabBarButton = ({
 );
 
 const BottomTabs = () => {
-  const {bottomSheetStatus, changeBottomSheetStatus} = useContext(
-    ShowBottomSheetContext,
-  );
-  const rotateIcon = useSharedValue(0);
-  const rotateIconStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{rotate: `${rotateIcon.value}deg`}],
-    };
-  });
-  useEffect(() => {
-    rotateIcon.value = withTiming(bottomSheetStatus ? 45 : 0, {
-      duration: 500,
-      easing: Easing.ease,
-    });
-  }, [bottomSheetStatus]);
-
   return (
     <Tab.Navigator
       screenOptions={{
@@ -90,16 +73,16 @@ const BottomTabs = () => {
         component={HomeScreen}
         options={{
           tabBarButton: props => (
-            <CustomTabBarButton {...props} onPress={changeBottomSheetStatus} />
+            <CustomTabBarButton {...props} onPress={() => alert('Hello')} />
           ),
           tabBarIcon: ({focused, color, size}) => (
             <View style={styles.centerButton}>
-              <Animated.View
-                style={{
-                  ...rotateIconStyle,
-                }}>
-                <Icon name="plus" color="white" size={40} />
-              </Animated.View>
+              <Icon
+                name="plus"
+                color="#fff"
+                size={35}
+                style={{transform: [{rotate: '45deg'}]}}
+              />
             </View>
           ),
           tabBarLabel: () => null,
