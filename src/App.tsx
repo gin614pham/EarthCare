@@ -5,6 +5,7 @@ import AuthNavigation from './navigation/AuthNavigation';
 import AppNavigation from './navigation/AppNavigation';
 import auth from '@react-native-firebase/auth';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import {PermissionsAndroid} from 'react-native';
 
 const Stack = createNativeStackNavigator();
 

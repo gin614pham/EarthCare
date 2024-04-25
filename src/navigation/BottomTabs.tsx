@@ -77,12 +77,7 @@ const BottomTabs = () => {
           ),
           tabBarIcon: ({focused, color, size}) => (
             <View style={styles.centerButton}>
-              <Icon
-                name="plus"
-                color="#fff"
-                size={35}
-                style={{transform: [{rotate: '45deg'}]}}
-              />
+              <Icon name="plus" color="#fff" size={35} />
             </View>
           ),
           tabBarLabel: () => null,
