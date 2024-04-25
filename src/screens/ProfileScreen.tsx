@@ -5,6 +5,7 @@ import loginStyles from '../styles/loginStyle';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import {useFocusEffect} from '@react-navigation/native';
 
 interface ProfileInfoType {
   name: string;
@@ -19,21 +20,22 @@ const ProfileScreen = ({navigation}: any) => {
     avatar: '',
   });
 
-  useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged(async user => {
-      if (user) {
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetchData = async () => {
         const userData = await firestore()
           .collection('users')
-          .doc(user.uid)
+          .doc(auth().currentUser?.uid)
           .get();
         if (userData.exists) {
           const {name, email, avatar} = userData.data();
           setProfileInfo({name, email, avatar});
         }
-      }
-    });
-    return unsubscribe;
-  }, []);
+      };
+
+      fetchData();
+    }, []),
+  );
 
   const handleEditProfile = () => {
     navigation.navigate('EditProfile');
@@ -54,10 +56,33 @@ const ProfileScreen = ({navigation}: any) => {
           <Text style={loginStyles.header}>{profileInfo.name}</Text>
           <Text style={loginStyles.text}>{profileInfo.email}</Text>
         </View>
-        <TouchableOpacity onPress={handleEditProfile}>
-          <Icon name="edit" size={30} color="black" />
+        <TouchableOpacity
+          onPress={handleEditProfile}
+          style={{alignItems: 'center'}}>
+          <Icon name="edit" size={10} color="black" />
+          <Text style={loginStyles.text}>Edit Profile</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={loginStyles.button} onPress={() => {}}>
+        <TouchableOpacity
+          style={loginStyles.button}
+          onPress={() => {
+            Alert.alert('Logout', 'Are you sure you want to logout?', [
+              {
+                text: 'Cancel',
+                onPress: () => console.log('Cancel Pressed'),
+                style: 'cancel',
+              },
+              {
+                text: 'OK',
+                onPress: () => {
+                  auth()
+                    .signOut()
+                    .then(() => {
+                      console.log('User signed out!');
+                    });
+                },
+              },
+            ]);
+          }}>
           <Text style={loginStyles.button_text}>Logout</Text>
         </TouchableOpacity>
       </View>

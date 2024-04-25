@@ -46,6 +46,7 @@ const EditProfileScreen = ({navigation}: any) => {
           avatar: avatar,
         });
         navigation.goBack();
+        Alert.alert('Success', 'Profile updated successfully');
       } catch (error) {
         Alert.alert('Error', 'Failed to update profile');
       }
