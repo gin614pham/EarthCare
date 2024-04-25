@@ -2,6 +2,7 @@ import React from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
 import BottomTabs from './BottomTabs';
+import EditProfileScreen from '../screens/EditProfileScreen';
 
 const AppStack = createNativeStackNavigator();
 const AppNavigation = () => {
@@ -9,6 +10,7 @@ const AppNavigation = () => {
     <AppStack.Navigator screenOptions={{headerShown: false}}>
       <AppStack.Screen name="BottomTabs" component={BottomTabs} />
       <AppStack.Screen name="Home" component={HomeScreen} />
+      <AppStack.Screen name="EditProfile" component={EditProfileScreen} />
     </AppStack.Navigator>
   );
 };

@@ -23,8 +23,7 @@ const HomeScreen = () => {
       const permissions = [
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         PermissionsAndroid.PERMISSIONS.CAMERA,
-        // PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-        // PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+        PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
       ];
 
       const granted = await PermissionsAndroid.requestMultiple(permissions);
@@ -48,12 +47,9 @@ const HomeScreen = () => {
       case PermissionsAndroid.PERMISSIONS.CAMERA:
         message = 'Camera permission is required to use this feature.';
         break;
-      // case PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE:
-      //   message = 'Read storage permission is required to use this feature.';
-      //   break;
-      // case PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE:
-      //   message = 'Write storage permission is required to use this feature.';
-      //   break;
+      case PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES:
+        message = 'Media permission is required to use this feature.';
+        break;
       default:
         message = 'Unknown permission is required to use this feature.';
     }
