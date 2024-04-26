@@ -7,6 +7,7 @@ import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import SearchScreen from '../screens/SearchScreen';
 import ActivitiesListScreen from '../screens/ActivitiesListScreen';
+import LinearGradient from 'react-native-linear-gradient';
 
 const Tab = createBottomTabNavigator();
 
@@ -26,7 +27,7 @@ const BottomTabs = () => {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: 'blue',
+        tabBarActiveTintColor: '#35B6FF',
         tabBarInactiveTintColor: '#B4E0F9',
         tabBarShowLabel: false,
         tabBarHideOnKeyboard: true,
@@ -68,9 +69,11 @@ const BottomTabs = () => {
             <CustomTabBarButton {...props} onPress={() => alert('Hello')} />
           ),
           tabBarIcon: ({focused, color, size}) => (
-            <View style={styles.centerButton}>
-              <Icon name="plus" color="#fff" size={35} />
-            </View>
+            <LinearGradient colors={['#B4E0F9', '#35B6FF']} style={styles.centerButton}>
+              <View>
+                <Icon name="plus" color="#fff" size={35} style={{fontWeight: 'bold'}} />
+              </View>
+            </LinearGradient>
           ),
           tabBarLabel: () => null,
         }}
