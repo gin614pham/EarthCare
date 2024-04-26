@@ -38,20 +38,20 @@ function App(): JSX.Element {
   const theme = {
     dark: false,
     colors: {
-      primary: 'rgb(255, 45, 85)',
-      background: 'rgb(242, 242, 242)',
+      primary: 'rgb(0, 122, 255)',
+      background: 'rgb(255, 255, 255)',
       card: 'rgb(255, 255, 255)',
       text: 'rgb(28, 28, 30)',
       border: 'rgb(199, 199, 204)',
-      notification: 'rgb(255, 69, 58)',
+      notification: 'rgb(0, 122, 255)',
     },
   };
   return (
-    <GestureHandlerRootView style={{flex: 1}} {...{theme}}>
+    <GestureHandlerRootView style={{flex: 1}}>
       <LoadingContext.Provider
         value={{isLoading: loading, setIsLoading: setLoading}}>
         <UserContext.Provider value={{user: user, setUser: setUser}}>
-          <NavigationContainer>
+          <NavigationContainer theme={theme}>
             <StatusBar
               barStyle="dark-content"
               backgroundColor="transparent"

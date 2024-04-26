@@ -48,6 +48,7 @@ const AppNavigation = () => {
     {
       name: 'ActivityScreen',
       component: ActivityScreen,
+      options: {headerShown: true},
       allowRoles: [0, 1, 2, 3],
     },
   ];

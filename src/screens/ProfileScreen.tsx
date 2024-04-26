@@ -28,8 +28,7 @@ const ProfileScreen = ({navigation}: any) => {
           <ProfileScreen2 navigation={navigation} />
         ) : (
           <View>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('LoginScreen')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
               <Text> Login </Text>
             </TouchableOpacity>
           </View>
