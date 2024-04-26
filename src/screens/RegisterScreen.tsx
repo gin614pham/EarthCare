@@ -12,6 +12,7 @@ import loginStyles from '../styles/loginStyle';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import LoadingContext from '../context/LoadingContext';
+import UserContext from '../context/UserContext';
 
 interface RegisterFormType {
   name: string;
@@ -28,6 +29,7 @@ const RegisterScreen = ({navigation}: any) => {
     confirmPassword: '',
   });
   const {setIsLoading} = React.useContext(LoadingContext);
+  const {user, setUser} = React.useContext(UserContext);
 
   const handleRegister = async () => {
     Keyboard.dismiss();
@@ -50,7 +52,16 @@ const RegisterScreen = ({navigation}: any) => {
             avatar: 'none',
           });
         });
+      console.log(userCredentials);
+      setUser({
+        uid: '',
+        email: registerForm.email,
+        role: 1,
+        avatar: 'none',
+        name: registerForm.name,
+      });
       Alert.alert('Success', 'Register success');
+      navigation.navigate('Map');
     } catch (error) {
       Alert.alert('Error', 'Register failed' + '\n' + error);
     } finally {

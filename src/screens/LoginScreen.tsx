@@ -35,7 +35,6 @@ const LoginScreen = ({navigation}: any) => {
         loginForm.email,
         loginForm.password,
       );
-      const authUser = auth().currentUser;
       const userData = await firestore()
         .collection('users')
         .doc(userCredentials.user.uid)
