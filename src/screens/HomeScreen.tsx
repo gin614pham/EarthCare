@@ -8,6 +8,7 @@ import {
   PermissionsAndroid,
 } from 'react-native';
 import BottomSheet from '@gorhom/bottom-sheet';
+import MapBox from '../components/MapBox';
 
 const HomeScreen = () => {
   const snapPoints = useMemo(() => ['25%', '50%'], []);
@@ -75,6 +76,7 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
+      <MapBox />
       <BottomSheet ref={bottomSheetRef} index={1} snapPoints={snapPoints}>
         <View style={styles.contentContainerStyle}>
           <Text>Awesome 🎉</Text>
@@ -92,8 +94,8 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    // justifyContent: 'center',
+    // alignItems: 'center',
   },
   contentContainerStyle: {
     alignItems: 'center',
