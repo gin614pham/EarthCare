@@ -48,7 +48,7 @@ const RegisterScreen = ({navigation}: any) => {
           firestore().collection('users').doc(user.user.uid).set({
             name: registerForm.name,
             email: registerForm.email,
-            role: 0,
+            role: 1,
             avatar: 'none',
           });
         });
