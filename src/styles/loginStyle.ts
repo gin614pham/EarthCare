@@ -66,6 +66,17 @@ const loginStyles = StyleSheet.create({
     height: 100,
     borderRadius: 50,
   },
+  edit_button: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 64,
+    borderRadius: 10,
+    elevation: 3,
+    backgroundColor: '#35B6FF',
+  },
 });
 
 export default loginStyles;

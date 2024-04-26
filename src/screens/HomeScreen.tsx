@@ -7,7 +7,6 @@ import {
   StyleSheet,
   PermissionsAndroid,
 } from 'react-native';
-import auth from '@react-native-firebase/auth';
 import BottomSheet from '@gorhom/bottom-sheet';
 
 const HomeScreen = () => {
@@ -67,20 +66,15 @@ const HomeScreen = () => {
     );
   };
 
-  const signOut = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      {
-        text: 'Cancel',
-        onPress: () => console.log('Cancel Pressed'),
-        style: 'cancel',
-      },
-      {text: 'OK', onPress: () => auth().signOut()},
-    ]);
+  const handlePresentModalOpen = () => {
+    bottomSheetRef.current?.expand();
+  };
+  const handlePresentModalClose = () => {
+    bottomSheetRef.current?.close();
   };
 
   return (
     <View style={styles.container}>
-      <Button title="Sign Out" onPress={signOut} />
       <BottomSheet ref={bottomSheetRef} index={1} snapPoints={snapPoints}>
         <View style={styles.contentContainerStyle}>
           <Text>Awesome 🎉</Text>

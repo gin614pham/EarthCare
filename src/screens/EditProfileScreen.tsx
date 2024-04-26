@@ -15,7 +15,7 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import ImagePicker from 'react-native-image-crop-picker';
 import Icon from 'react-native-vector-icons/FontAwesome';
-
+import SkeletonPlaceholder from 'react-native-skeleton-placeholder';
 const EditProfileScreen = ({navigation}: any) => {
   const [name, setName] = useState('');
   const [avatar, setAvatar] = useState('');
@@ -59,6 +59,7 @@ const EditProfileScreen = ({navigation}: any) => {
       height: 400,
       cropping: true,
     }).then(async image => {
+      setAvatar('');
       const uploadUri =
         Platform.OS === 'ios' ? image.path.replace('file://', '') : image.path;
       const filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
@@ -80,36 +81,44 @@ const EditProfileScreen = ({navigation}: any) => {
       <View style={loginStyles.container}>
         <Text style={loginStyles.header}>Edit Profile</Text>
         <TouchableOpacity onPress={selectImage}>
-          <View
-            style={{
-              position: 'relative',
-              alignItems: 'center',
-              justifyContent: 'center',
-              shadowColor: '#000',
-              shadowOffset: {
-                width: 0,
-                height: 2,
-              },
-              shadowOpacity: 0.25,
-            }}>
-            <Image
-              source={
-                avatar ? {uri: avatar} : require('../assets/avt-default.png')
-              }
-              style={loginStyles.avatar}
-            />
-            <Icon
-              name="camera"
-              size={20}
-              color="#000"
+          {avatar === '' ? (
+            <SkeletonPlaceholder>
+              <View style={{height: 100, width: 100, borderRadius: 50}} />
+            </SkeletonPlaceholder>
+          ) : (
+            <View
               style={{
-                position: 'absolute',
-                backgroundColor: '#fff',
-                padding: 5,
-                borderRadius: 10,
-              }}
-            />
-          </View>
+                position: 'relative',
+                alignItems: 'center',
+                justifyContent: 'center',
+                shadowColor: '#000',
+                shadowOffset: {
+                  width: 0,
+                  height: 2,
+                },
+                shadowOpacity: 0.25,
+              }}>
+              <Image
+                source={
+                  avatar == 'none'
+                    ? require('../assets/images/avt-default.png')
+                    : {uri: avatar}
+                }
+                style={loginStyles.avatar}
+              />
+              <Icon
+                name="camera"
+                size={20}
+                color="#000"
+                style={{
+                  position: 'absolute',
+                  backgroundColor: '#fff',
+                  padding: 5,
+                  borderRadius: 10,
+                }}
+              />
+            </View>
+          )}
         </TouchableOpacity>
         <View style={loginStyles.input_container}>
           <TextInput

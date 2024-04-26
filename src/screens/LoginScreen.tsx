@@ -1,8 +1,18 @@
 import React, {useState} from 'react';
-import {Text, TextInput, TouchableOpacity, View, Alert} from 'react-native';
+import {
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Alert,
+  Keyboard,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import loginStyles from '../styles/loginStyle';
 import auth from '@react-native-firebase/auth';
+import LoadingContext from '../context/LoadingContext';
+import firestore from '@react-native-firebase/firestore';
+import UserContext from '../context/UserContext';
 
 interface LoginFormType {
   email: string;
@@ -14,16 +24,36 @@ const LoginScreen = ({navigation}: any) => {
     email: '',
     password: '',
   });
+  const {setIsLoading} = React.useContext(LoadingContext);
+  const {user, setUser} = React.useContext(UserContext);
 
   const handleLogin = async () => {
+    Keyboard.dismiss();
     try {
+      setIsLoading(true);
       const userCredentials = await auth().signInWithEmailAndPassword(
         loginForm.email,
         loginForm.password,
       );
+      const authUser = auth().currentUser;
+      const userData = await firestore()
+        .collection('users')
+        .doc(userCredentials.user.uid)
+        .get();
+      setUser({
+        uid: userCredentials.user.uid,
+        email: userCredentials.user.email,
+        role: userData.data()?.role,
+        avatar: userData.data()?.avatar,
+        name: userData.data()?.name,
+      });
+      navigation.navigate('Map');
+
       Alert.alert('Thành công', 'Đăng nhập thành công');
     } catch (error) {
       Alert.alert('Lỗi', 'Đăng nhập thất bại' + '\n' + error);
+    } finally {
+      setIsLoading(false);
     }
   };
   const handleChange = (name: string, value: string) => {

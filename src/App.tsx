@@ -1,21 +1,38 @@
 import React, {useEffect, useState} from 'react';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {NavigationContainer} from '@react-navigation/native';
-import AuthNavigation from './navigation/AuthNavigation';
 import AppNavigation from './navigation/AppNavigation';
 import auth from '@react-native-firebase/auth';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import {PermissionsAndroid} from 'react-native';
 import {StatusBar} from 'react-native';
-
-const Stack = createNativeStackNavigator();
+import LoadingScreen from './screens/other/LoadingScreen';
+import LoadingContext from './context/LoadingContext';
+import UserContext from './context/UserContext';
+import firestore from '@react-native-firebase/firestore';
 
 function App(): JSX.Element {
-  const [user, setUser] = useState(auth().currentUser);
+  const [user, setUser] = useState<any>({});
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const unsubscribe = auth().onAuthStateChanged(setUser);
-    return unsubscribe;
+    const userAuth = auth().currentUser;
+    if (userAuth) {
+      const fetchData = async () => {
+        const userData = await firestore()
+          .collection('users')
+          .doc(userAuth.uid)
+          .get();
+        if (userData.exists) {
+          setUser({
+            uid: userAuth.uid,
+            email: userAuth.email,
+            role: userData.data()?.role,
+            avatar: userData.data()?.avatar,
+            name: userData.data()?.name,
+          });
+        }
+      };
+      fetchData();
+    }
   }, []);
 
   const theme = {
@@ -31,14 +48,20 @@ function App(): JSX.Element {
   };
   return (
     <GestureHandlerRootView style={{flex: 1}} {...{theme}}>
-      <NavigationContainer>
-        <StatusBar
-          barStyle="dark-content"
-          backgroundColor="transparent"
-          translucent={false}
-        />
-        {user ? AppNavigation() : AuthNavigation()}
-      </NavigationContainer>
+      <LoadingContext.Provider
+        value={{isLoading: loading, setIsLoading: setLoading}}>
+        <UserContext.Provider value={{user: user, setUser: setUser}}>
+          <NavigationContainer>
+            <StatusBar
+              barStyle="dark-content"
+              backgroundColor="transparent"
+              translucent={false}
+            />
+            <AppNavigation />
+            {loading && <LoadingScreen />}
+          </NavigationContainer>
+        </UserContext.Provider>
+      </LoadingContext.Provider>
     </GestureHandlerRootView>
   );
 }

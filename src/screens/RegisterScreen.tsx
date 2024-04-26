@@ -1,9 +1,17 @@
 import React, {useState} from 'react';
-import {Text, TextInput, TouchableOpacity, View, Alert} from 'react-native';
+import {
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Alert,
+  Keyboard,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import loginStyles from '../styles/loginStyle';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
+import LoadingContext from '../context/LoadingContext';
 
 interface RegisterFormType {
   name: string;
@@ -19,9 +27,16 @@ const RegisterScreen = ({navigation}: any) => {
     password: '',
     confirmPassword: '',
   });
+  const {setIsLoading} = React.useContext(LoadingContext);
 
   const handleRegister = async () => {
+    Keyboard.dismiss();
+    if (registerForm.password !== registerForm.confirmPassword) {
+      Alert.alert('Error', 'Password and Confirm Password must be the same');
+      return;
+    }
     try {
+      setIsLoading(true);
       const userCredentials = await auth()
         .createUserWithEmailAndPassword(
           registerForm.email,
@@ -31,11 +46,15 @@ const RegisterScreen = ({navigation}: any) => {
           firestore().collection('users').doc(user.user.uid).set({
             name: registerForm.name,
             email: registerForm.email,
+            role: 0,
+            avatar: 'none',
           });
         });
       Alert.alert('Success', 'Register success');
     } catch (error) {
       Alert.alert('Error', 'Register failed' + '\n' + error);
+    } finally {
+      setIsLoading(false);
     }
   };
   const handleChange = (name: string, value: string) => {

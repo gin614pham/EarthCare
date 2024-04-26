@@ -1,19 +1,12 @@
-import React, {useContext, useEffect} from 'react';
+import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {View, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import Icon2 from 'react-native-vector-icons/Feather';
-
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import SearchScreen from '../screens/SearchScreen';
 import ActivityScreen from '../screens/ActivityScreen';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  Easing,
-} from 'react-native-reanimated';
 
 const Tab = createBottomTabNavigator();
 
@@ -38,7 +31,6 @@ const BottomTabs = () => {
         tabBarShowLabel: false,
         tabBarHideOnKeyboard: true,
         headerShown: false,
-        //shadow,
         tabBarStyle: {
           position: 'absolute',
           bottom: 20,

@@ -1,16 +1,64 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import HomeScreen from '../screens/HomeScreen';
 import BottomTabs from './BottomTabs';
 import EditProfileScreen from '../screens/EditProfileScreen';
-
+import LoginScreen from '../screens/LoginScreen';
+import RegisterScreen from '../screens/RegisterScreen';
 const AppStack = createNativeStackNavigator();
+import UserContext from '../context/UserContext';
+
 const AppNavigation = () => {
+  const {user} = React.useContext(UserContext);
+  const [role, setRole] = useState(0);
+
+  useEffect(() => {
+    if (user?.role && user?.role !== undefined) {
+      setRole(user?.role);
+    } else {
+      setRole(0);
+    }
+  }, [user]);
+  // 0: guest, 1: user, 2: admin,3 volunteer
+  const stack = [
+    {
+      name: 'BottomTabs',
+      component: BottomTabs,
+      options: {headerShown: false},
+      allowRoles: [0, 1, 2, 3],
+    },
+    {
+      name: 'LoginScreen',
+      component: LoginScreen,
+      options: {headerShown: false},
+      allowRoles: [0],
+    },
+    {
+      name: 'RegisterScreen',
+      component: RegisterScreen,
+      options: {headerShown: false},
+      allowRoles: [0],
+    },
+    {
+      name: 'EditProfile',
+      component: EditProfileScreen,
+      options: {headerShown: false},
+      allowRoles: [1, 2, 3],
+    },
+  ];
   return (
     <AppStack.Navigator screenOptions={{headerShown: false}}>
-      <AppStack.Screen name="BottomTabs" component={BottomTabs} />
-      <AppStack.Screen name="Home" component={HomeScreen} />
-      <AppStack.Screen name="EditProfile" component={EditProfileScreen} />
+      {stack.map((item, index) => {
+        if (item.allowRoles.includes(role)) {
+          return (
+            <AppStack.Screen
+              key={index}
+              name={item.name}
+              component={item.component}
+              options={item.options}
+            />
+          );
+        }
+      })}
     </AppStack.Navigator>
   );
 };
