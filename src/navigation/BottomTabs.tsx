@@ -6,7 +6,7 @@ import Icon2 from 'react-native-vector-icons/Feather';
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import SearchScreen from '../screens/SearchScreen';
-import ActivityScreen from '../screens/ActivityScreen';
+import ActivitiesListScreen from '../screens/ActivitiesListScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -77,7 +77,7 @@ const BottomTabs = () => {
       />
       <Tab.Screen
         name="Activity"
-        component={ActivityScreen}
+        component={ActivitiesListScreen}
         options={{
           tabBarIcon: ({color, size}) => (
             <Icon name="hearto" color={color} size={35} />

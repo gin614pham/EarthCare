@@ -6,6 +6,7 @@ import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 const AppStack = createNativeStackNavigator();
 import UserContext from '../context/UserContext';
+import ActivityScreen from '../screens/ActivityScreen';
 
 const AppNavigation = () => {
   const {user} = React.useContext(UserContext);
@@ -27,13 +28,13 @@ const AppNavigation = () => {
       allowRoles: [0, 1, 2, 3],
     },
     {
-      name: 'LoginScreen',
+      name: 'Login',
       component: LoginScreen,
       options: {headerShown: false},
       allowRoles: [0],
     },
     {
-      name: 'RegisterScreen',
+      name: 'Register',
       component: RegisterScreen,
       options: {headerShown: false},
       allowRoles: [0],
@@ -43,6 +44,11 @@ const AppNavigation = () => {
       component: EditProfileScreen,
       options: {headerShown: false},
       allowRoles: [1, 2, 3],
+    },
+    {
+      name: 'ActivityScreen',
+      component: ActivityScreen,
+      allowRoles: [0, 1, 2, 3],
     },
   ];
   return (
