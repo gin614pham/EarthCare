@@ -58,7 +58,7 @@ const MapGoogle = ({setRegionAddF}) => {
     });
   }, []);
 
-  const handleGetCurrentLocation = () => {
+  const handleLocationButton = () => {
     Geolocation.getCurrentPosition(position => {
       const newRegion = {
         latitude: position.coords.latitude,
@@ -108,7 +108,9 @@ const MapGoogle = ({setRegionAddF}) => {
         />
       </View>
 
-      <TouchableOpacity style={styles.locationButton}>
+      <TouchableOpacity
+        style={styles.locationButton}
+        onPress={handleLocationButton}>
         <Text>
           <Icon2 name="location-crosshairs" size={50} color="blue" />
         </Text>

@@ -8,6 +8,7 @@ const loginStyles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'flex-start',
+    paddingTop: 50,
   },
   input_container: {
     width: '100%',
