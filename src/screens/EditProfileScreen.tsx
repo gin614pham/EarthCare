@@ -28,10 +28,7 @@ const EditProfileScreen = ({navigation}: any) => {
           .doc(user.uid)
           .get();
         if (userData.exists) {
-          const {name, avatar} = userData.data() as {
-            name: string;
-            avatar: string;
-          };
+          const {name, avatar} = userData.data();
           setName(name);
           setAvatar(avatar);
         }
@@ -62,7 +59,7 @@ const EditProfileScreen = ({navigation}: any) => {
       height: 400,
       cropping: true,
     }).then(async image => {
-      setAvatar('');
+      setAvatar();
       const uploadUri =
         Platform.OS === 'ios' ? image.path.replace('file://', '') : image.path;
       const filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);

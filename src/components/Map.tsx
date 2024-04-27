@@ -272,6 +272,11 @@ const App = () => {
         enablePanDownToClose>
         {selectedLocation && (
           <View style={styles.bottomSheetContent}>
+            <Text style={{fontSize: 20, fontWeight: 'bold'}}>
+              Address:
+              {selectedLocation.address}
+            </Text>
+
             <TouchableOpacity
               style={styles.closeButton}
               onPress={handleCloseBottomSheet}>

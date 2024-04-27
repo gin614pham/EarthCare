@@ -9,10 +9,12 @@ import {
   Image,
   StyleSheet,
   Modal,
+  Platform,
 } from 'react-native';
 import loginStyles from '../styles/loginStyle';
 import firestore from '@react-native-firebase/firestore';
-import ImageCropPicker from 'react-native-image-crop-picker';
+import storage from '@react-native-firebase/storage';
+import ImagePicker from 'react-native-image-crop-picker';
 import {Picker} from '@react-native-picker/picker';
 import MapGoogle from '../components/MapGoogle';
 import {Button} from 'react-native-paper';
@@ -51,28 +53,60 @@ const AddLocationScreen = ({navigation}: any) => {
   };
 
   const handleChooseImage = () => {
-    ImageCropPicker.openPicker({
+    ImagePicker.openPicker({
       width: 300,
       height: 400,
       cropping: true,
-    }).then(image => {
+    }).then(async image => {
       setLocationInfo(prevState => ({
         ...prevState,
-        image: image.path,
+        image: '',
       }));
+      const uploadUri =
+        Platform.OS === 'ios' ? image.path.replace('file://', '') : image.path;
+      const filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
+      const storageRef = storage().ref(`avatars/${filename}`);
+      storageRef
+        .putFile(uploadUri)
+        .then(async snapshot => {
+          const downloadUrl = await storageRef.getDownloadURL();
+          setLocationInfo(prevState => ({
+            ...prevState,
+            image: downloadUrl,
+          }));
+        })
+        .catch(error => {
+          console.error('Error uploading image: ', error);
+        });
     });
   };
 
   const handleTakePhoto = () => {
-    ImageCropPicker.openCamera({
+    ImagePicker.openCamera({
       width: 300,
       height: 400,
       cropping: true,
-    }).then(image => {
+    }).then(async image => {
       setLocationInfo(prevState => ({
         ...prevState,
-        image: image.path,
+        image: '',
       }));
+      const uploadUri =
+        Platform.OS === 'ios' ? image.path.replace('file://', '') : image.path;
+      const filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
+      const storageRef = storage().ref(`avatars/${filename}`);
+      storageRef
+        .putFile(uploadUri)
+        .then(async snapshot => {
+          const downloadUrl = await storageRef.getDownloadURL();
+          setLocationInfo(prevState => ({
+            ...prevState,
+            image: downloadUrl,
+          }));
+        })
+        .catch(error => {
+          console.error('Error uploading image: ', error);
+        });
     });
   };
 
