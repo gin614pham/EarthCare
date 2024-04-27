@@ -8,6 +8,7 @@ import {
   PermissionsAndroid,
 } from 'react-native';
 import BottomSheet from '@gorhom/bottom-sheet';
+import Map from '../components/Map';
 
 const HomeScreen = () => {
   const snapPoints = useMemo(() => ['25%', '50%'], []);
@@ -75,14 +76,15 @@ const HomeScreen = () => {
 
   return (
     <View style={styles.container}>
-      <BottomSheet ref={bottomSheetRef} index={1} snapPoints={snapPoints}>
+      {/* <BottomSheet ref={bottomSheetRef} index={1} snapPoints={snapPoints}>
         <View style={styles.contentContainerStyle}>
           <Text>Awesome 🎉</Text>
           <Text>Áds</Text>
           <Text>Waka wake ê ê</Text>
           <Text>ccccccccccccc</Text>
         </View>
-      </BottomSheet>
+      </BottomSheet> */}
+      <Map />
     </View>
   );
 };

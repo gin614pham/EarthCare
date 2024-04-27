@@ -7,6 +7,7 @@ import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import SearchScreen from '../screens/SearchScreen';
 import ActivitiesListScreen from '../screens/ActivitiesListScreen';
+import LinearGradient from 'react-native-linear-gradient';
 
 const Tab = createBottomTabNavigator();
 
@@ -22,12 +23,11 @@ const CustomTabBarButton = ({
   </TouchableOpacity>
 );
 
-const BottomTabs = () => {
+const BottomTabs = ({navigation}: any) => {
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: 'blue',
-        tabBarInactiveTintColor: '#B4E0F9',
+        tabBarActiveTintColor: '#35B6FF',
         tabBarShowLabel: false,
         tabBarHideOnKeyboard: true,
         headerShown: false,
@@ -37,8 +37,8 @@ const BottomTabs = () => {
           left: 20,
           right: 20,
           backgroundColor: '#ffffff',
-          borderRadius: 15,
-          height: 90,
+          borderRadius: 10,
+          height: 80,
           ...styles.shadow,
         },
       }}>
@@ -65,12 +65,24 @@ const BottomTabs = () => {
         component={HomeScreen}
         options={{
           tabBarButton: props => (
-            <CustomTabBarButton {...props} onPress={() => alert('Hello')} />
+            <CustomTabBarButton
+              {...props}
+              onPress={() => navigation.navigate('AddLocation')}
+            />
           ),
           tabBarIcon: ({focused, color, size}) => (
-            <View style={styles.centerButton}>
-              <Icon name="plus" color="#fff" size={35} />
-            </View>
+            <LinearGradient
+              colors={['#B4E0F9', '#35B6FF']}
+              style={styles.centerButton}>
+              <View>
+                <Icon
+                  name="plus"
+                  color="#fff"
+                  size={35}
+                  style={{fontWeight: 'bold'}}
+                />
+              </View>
+            </LinearGradient>
           ),
           tabBarLabel: () => null,
         }}

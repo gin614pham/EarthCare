@@ -7,7 +7,7 @@ const loginStyles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
   },
   input_container: {
     width: '100%',
@@ -76,6 +76,13 @@ const loginStyles = StyleSheet.create({
     borderRadius: 10,
     elevation: 3,
     backgroundColor: '#35B6FF',
+  },
+  dropdown: {
+    height: 50,
+    width: '90%',
+    margin: 10,
+    borderRadius: 10,
+    backgroundColor: 'white',
   },
 });
 

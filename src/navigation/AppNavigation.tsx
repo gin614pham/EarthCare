@@ -7,6 +7,7 @@ import RegisterScreen from '../screens/RegisterScreen';
 const AppStack = createNativeStackNavigator();
 import UserContext from '../context/UserContext';
 import ActivityScreen from '../screens/ActivityScreen';
+import AddLocationScreen from '../screens/AddLocationScreen';
 
 const AppNavigation = () => {
   const {user} = React.useContext(UserContext);
@@ -48,6 +49,12 @@ const AppNavigation = () => {
     {
       name: 'ActivityScreen',
       component: ActivityScreen,
+      options: {headerShown: true},
+      allowRoles: [0, 1, 2, 3],
+    },
+    {
+      name: 'AddLocation',
+      component: AddLocationScreen,
       options: {headerShown: true},
       allowRoles: [0, 1, 2, 3],
     },
