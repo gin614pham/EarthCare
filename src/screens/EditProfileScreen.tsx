@@ -28,7 +28,10 @@ const EditProfileScreen = ({navigation}: any) => {
           .doc(user.uid)
           .get();
         if (userData.exists) {
-          const {name, avatar} = userData.data();
+          const {name, avatar} = userData.data() as {
+            name: string;
+            avatar: string;
+          };
           setName(name);
           setAvatar(avatar);
         }

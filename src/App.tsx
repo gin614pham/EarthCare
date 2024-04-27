@@ -3,7 +3,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import AppNavigation from './navigation/AppNavigation';
 import auth from '@react-native-firebase/auth';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import {StatusBar, SafeAreaView} from 'react-native';
+import {StatusBar} from 'react-native';
 import LoadingScreen from './screens/other/LoadingScreen';
 import LoadingContext from './context/LoadingContext';
 import UserContext from './context/UserContext';
@@ -12,28 +12,34 @@ import {PaperProvider} from 'react-native-paper';
 
 function App(): JSX.Element {
   const [user, setUser] = useState<any>({});
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const userAuth = auth().currentUser;
-    if (userAuth) {
-      const fetchData = async () => {
-        const userData = await firestore()
-          .collection('users')
-          .doc(userAuth.uid)
-          .get();
-        if (userData.exists) {
-          setUser({
-            uid: userAuth.uid,
-            email: userAuth.email,
-            role: userData.data()?.role,
-            avatar: userData.data()?.avatar,
-            name: userData.data()?.name,
-          });
+    const fetchData = async () => {
+      const userAuth = auth().currentUser;
+      if (userAuth) {
+        try {
+          const userData = await firestore()
+            .collection('users')
+            .doc(userAuth.uid)
+            .get();
+          if (userData.exists) {
+            setUser({
+              uid: userAuth.uid,
+              email: userAuth.email,
+              role: userData.data()?.role,
+              avatar: userData.data()?.avatar,
+              name: userData.data()?.name,
+            });
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
         }
-      };
-      fetchData();
-    }
+      }
+      setLoading(false);
+    };
+
+    fetchData();
   }, []);
 
   const theme = {
@@ -47,6 +53,7 @@ function App(): JSX.Element {
       notification: 'rgb(0, 122, 255)',
     },
   };
+
   return (
     <GestureHandlerRootView style={{flex: 1}}>
       <PaperProvider>
@@ -54,11 +61,7 @@ function App(): JSX.Element {
           value={{isLoading: loading, setIsLoading: setLoading}}>
           <UserContext.Provider value={{user: user, setUser: setUser}}>
             <NavigationContainer theme={theme}>
-              <StatusBar
-                barStyle="dark-content"
-                backgroundColor="transparent"
-                translucent={false}
-              />
+              <StatusBar barStyle="dark-content" />
               <AppNavigation />
               {loading && <LoadingScreen />}
             </NavigationContainer>

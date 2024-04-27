@@ -1,89 +1,37 @@
-import React, {useEffect, useMemo, useRef} from 'react';
-import {
-  View,
-  Text,
-  Button,
-  Alert,
-  StyleSheet,
-  PermissionsAndroid,
-} from 'react-native';
-import BottomSheet from '@gorhom/bottom-sheet';
+import React, {useEffect, useState} from 'react';
+import {View, Alert, StyleSheet, PermissionsAndroid} from 'react-native';
 import Map from '../components/Map';
 
 const HomeScreen = () => {
-  const snapPoints = useMemo(() => ['25%', '50%'], []);
-  const bottomSheetRef = useRef<BottomSheet>(null);
-
   useEffect(() => {
-    requestPermissions();
-  }, []);
-
-  const requestPermissions = async () => {
-    try {
-      const permissions = [
-        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-        PermissionsAndroid.PERMISSIONS.CAMERA,
-        PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES,
-      ];
-
-      const granted = await PermissionsAndroid.requestMultiple(permissions);
-
-      for (const permission in granted) {
-        if (granted[permission] !== PermissionsAndroid.RESULTS.GRANTED) {
-          handlePermissionDenied(permission);
+    const requestLocationPermission = async () => {
+      try {
+        const granted = await PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+          {
+            title: 'Location Permission',
+            message: 'EarthCare needs access to your location',
+            buttonNeutral: 'Ask Me Later',
+            buttonNegative: 'Cancel',
+            buttonPositive: 'OK',
+          },
+        );
+        if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+          Alert.alert(
+            'Location Permission',
+            'EarthCare needs access to your location',
+          );
         }
+      } catch (err) {
+        console.warn(err);
       }
-    } catch (err) {
-      console.warn(err);
-    }
-  };
+    };
 
-  const handlePermissionDenied = permission => {
-    let message = '';
-    switch (permission) {
-      case PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION:
-        message = 'Location permission is required to use this feature.';
-        break;
-      case PermissionsAndroid.PERMISSIONS.CAMERA:
-        message = 'Camera permission is required to use this feature.';
-        break;
-      case PermissionsAndroid.PERMISSIONS.READ_MEDIA_IMAGES:
-        message = 'Media permission is required to use this feature.';
-        break;
-      default:
-        message = 'Unknown permission is required to use this feature.';
-    }
-
-    Alert.alert(
-      'Permission Denied',
-      message,
-      [
-        {
-          text: 'OK',
-          onPress: () => console.log('OK Pressed'),
-        },
-      ],
-      {cancelable: false},
-    );
-  };
-
-  const handlePresentModalOpen = () => {
-    bottomSheetRef.current?.expand();
-  };
-  const handlePresentModalClose = () => {
-    bottomSheetRef.current?.close();
-  };
+    requestLocationPermission();
+  }, []);
 
   return (
     <View style={styles.container}>
-      {/* <BottomSheet ref={bottomSheetRef} index={1} snapPoints={snapPoints}>
-        <View style={styles.contentContainerStyle}>
-          <Text>Awesome 🎉</Text>
-          <Text>Áds</Text>
-          <Text>Waka wake ê ê</Text>
-          <Text>ccccccccccccc</Text>
-        </View>
-      </BottomSheet> */}
       <Map />
     </View>
   );
@@ -94,8 +42,6 @@ export default HomeScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // justifyContent: 'center',
-    // alignItems: 'center',
   },
   contentContainerStyle: {
     alignItems: 'center',

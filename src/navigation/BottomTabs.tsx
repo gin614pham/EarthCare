@@ -1,6 +1,6 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {View, StyleSheet, TouchableOpacity} from 'react-native';
+import {View, StyleSheet, TouchableOpacity, Alert} from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import Icon2 from 'react-native-vector-icons/Feather';
 import HomeScreen from '../screens/HomeScreen';
@@ -8,6 +8,8 @@ import ProfileScreen from '../screens/ProfileScreen';
 import SearchScreen from '../screens/SearchScreen';
 import ActivitiesListScreen from '../screens/ActivitiesListScreen';
 import LinearGradient from 'react-native-linear-gradient';
+import {navigationCustom} from './AppNavigation';
+import UserContext from '../context/UserContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -24,6 +26,10 @@ const CustomTabBarButton = ({
 );
 
 const BottomTabs = ({navigation}: any) => {
+  const {user} = React.useContext(UserContext);
+  const directionPage = (page: string) => {
+    navigationCustom(user?.role, navigation, page);
+  };
   return (
     <Tab.Navigator
       screenOptions={{
@@ -67,7 +73,7 @@ const BottomTabs = ({navigation}: any) => {
           tabBarButton: props => (
             <CustomTabBarButton
               {...props}
-              onPress={() => navigation.navigate('AddLocation')}
+              onPress={() => directionPage('AddLocation')}
             />
           ),
           tabBarIcon: ({focused, color, size}) => (

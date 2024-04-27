@@ -52,7 +52,7 @@ const RegisterScreen = ({navigation}: any) => {
             avatar: 'none',
           });
         });
-      console.log(userCredentials);
+
       setUser({
         uid: '',
         email: registerForm.email,

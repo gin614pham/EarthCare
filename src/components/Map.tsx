@@ -7,7 +7,6 @@ import {
   Dimensions,
   Image,
   ScrollView,
-  StatusBar,
 } from 'react-native';
 import MapView, {
   Callout,
@@ -21,9 +20,8 @@ import Icon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome 
 import Icon2 from 'react-native-vector-icons/Entypo'; // Import FontAwesome5 icon librar
 import firestore from '@react-native-firebase/firestore';
 import BottomSheet from '@gorhom/bottom-sheet';
-import {TextInput} from 'react-native-gesture-handler';
-import {Chip, Portal} from 'react-native-paper';
-import Carousel from 'react-native-snap-carousel';
+import {FlatList, TextInput} from 'react-native-gesture-handler';
+import {Chip} from 'react-native-paper';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -119,7 +117,7 @@ const App = () => {
           id: doc.id,
           ...doc.data(),
         }));
-        setLocations(locations);
+        setLocations(locations as any);
       });
 
     return () => unsubscribe();
@@ -162,15 +160,15 @@ const App = () => {
     {title: 'Vị trí tái chế rác', icon: 'map-marker'},
   ];
 
-  const renderCarouselItem = ({item}) => {
+  const renderCarouselItem = ({item}: any) => {
     return (
       <Chip
         icon={item.icon}
-        onPress={() => console.log('Pressed')}
         style={{
           backgroundColor: 'white',
           borderRadius: 20,
           padding: 3,
+          marginRight: 5,
         }}>
         {item.title}
       </Chip>
@@ -258,13 +256,12 @@ const App = () => {
           flexDirection: 'row',
           gap: 10,
         }}>
-        <Carousel
+        <FlatList
+          horizontal
           data={carouselItems}
           renderItem={renderCarouselItem}
-          sliderWidth={100}
-          itemWidth={150}
-          layout="default"
-          loop
+          keyExtractor={item => item.title}
+          showsHorizontalScrollIndicator={false}
         />
       </View>
 

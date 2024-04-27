@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {Text, TouchableOpacity, View, Image, Alert} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import loginStyles from '../styles/loginStyle';
@@ -31,7 +31,7 @@ const ProfileScreen2 = ({navigation}: any) => {
           .doc(auth().currentUser?.uid)
           .get();
         if (userData.exists) {
-          const {name, email, avatar} = userData.data();
+          const {name, email, avatar} = userData.data() as ProfileInfoType;
           setProfileInfo({name, email, avatar});
         }
       };
@@ -89,7 +89,6 @@ const ProfileScreen2 = ({navigation}: any) => {
             Alert.alert('Logout', 'Are you sure you want to logout?', [
               {
                 text: 'Cancel',
-                onPress: () => console.log('Cancel Pressed'),
                 style: 'cancel',
               },
               {

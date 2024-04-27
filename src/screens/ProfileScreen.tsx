@@ -7,20 +7,17 @@ import LinearGradient from 'react-native-linear-gradient';
 import UserContext from '../context/UserContext';
 
 const ProfileScreen = ({navigation}: any) => {
-  const [role, setRole] = React.useState(0);
+  const [role, setRole] = React.useState<number>(0);
   const {user} = React.useContext(UserContext);
 
   useEffect(() => {
-    if (user?.role && user?.role !== undefined) {
-      setRole(user?.role);
+    if ((user as {role?: number})?.role !== undefined) {
+      setRole((user as {role?: number}).role || 0);
     } else {
       setRole(0);
     }
   }, [user]);
 
-  useEffect(() => {
-    console.log('usssser', user);
-  }, []);
   return (
     <LinearGradient colors={['#B4E0F9', '#FDFBFB']} style={{flex: 1}}>
       <View style={loginStyles.container}>

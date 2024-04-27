@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {
   Text,
   TextInput,
@@ -10,15 +10,10 @@ import {
   StyleSheet,
   Modal,
 } from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 import loginStyles from '../styles/loginStyle';
 import firestore from '@react-native-firebase/firestore';
-import Geolocation from '@react-native-community/geolocation';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import {Picker} from '@react-native-picker/picker';
-import Icon from 'react-native-vector-icons/AntDesign';
-import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
-import Map from '../components/Map';
 import MapGoogle from '../components/MapGoogle';
 import {Button} from 'react-native-paper';
 
@@ -40,7 +35,6 @@ const AddLocationScreen = ({navigation}: any) => {
   const handleAddLocation = async () => {
     Keyboard.dismiss();
     try {
-      // Add location to Firestore
       await firestore()
         .collection('locations')
         .add({
@@ -50,6 +44,7 @@ const AddLocationScreen = ({navigation}: any) => {
         });
 
       Alert.alert('Success', 'Location added successfully');
+      navigation.navigate('BottomTabs');
     } catch (error) {
       Alert.alert('Error', 'Failed to add location' + '\n' + error);
     }
@@ -61,7 +56,6 @@ const AddLocationScreen = ({navigation}: any) => {
       height: 400,
       cropping: true,
     }).then(image => {
-      // Set the chosen image
       setLocationInfo(prevState => ({
         ...prevState,
         image: image.path,
@@ -75,7 +69,6 @@ const AddLocationScreen = ({navigation}: any) => {
       height: 400,
       cropping: true,
     }).then(image => {
-      // Set the taken photo
       setLocationInfo(prevState => ({
         ...prevState,
         image: image.path,
@@ -92,8 +85,6 @@ const AddLocationScreen = ({navigation}: any) => {
 
   const handleSaveLocation = () => {
     setModalVisible(false);
-    const {latitude, longitude} = locationAdd;
-    console.log('Location', latitude, longitude);
   };
 
   const setRegionAddF = (region: any) => {
@@ -113,7 +104,6 @@ const AddLocationScreen = ({navigation}: any) => {
         <Modal visible={modalVisible} animationType="slide">
           <View style={styles.modalContainer}>
             <MapGoogle
-              style={styles.map}
               setRegionAddF={(region: any) => {
                 setRegionAddF(region);
               }}></MapGoogle>
