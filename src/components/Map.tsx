@@ -7,81 +7,27 @@ import {
   Dimensions,
   Image,
   ScrollView,
+  ListRenderItemInfo,
 } from 'react-native';
 import MapView, {
   Callout,
   Circle,
   Marker,
   PROVIDER_GOOGLE,
+  PROVIDER_DEFAULT,
 } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 import Icon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome icon library
-import Icon2 from 'react-native-vector-icons/Entypo'; // Import FontAwesome5 icon librar
+import Icon2 from 'react-native-vector-icons/Entypo'; // Import FontAwesome5 icon library
 import firestore from '@react-native-firebase/firestore';
 import BottomSheet from '@gorhom/bottom-sheet';
 import {FlatList, TextInput} from 'react-native-gesture-handler';
 import {Chip} from 'react-native-paper';
+import {CarouselItems, Location} from '../types';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
-
-const styles = StyleSheet.create({
-  container: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  map: {
-    width: windowWidth,
-    height: windowHeight,
-  },
-  searchContainer: {
-    position: 'absolute',
-    top: 10,
-    left: 10,
-    right: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.0)',
-    borderRadius: 20,
-    padding: 10,
-    width: windowWidth - 20,
-  },
-  locationButton: {
-    position: 'absolute',
-    top: windowHeight * 0.7 + 20,
-    right: 20,
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 50,
-    width: 60,
-    height: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  bottomSheetContent: {
-    padding: 20,
-  },
-  closeButton: {
-    position: 'absolute',
-    top: 10,
-    right: 10,
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingVertical: 10,
-    backgroundColor: '#f2f2f2',
-  },
-  tabButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 5,
-  },
-  activeTab: {
-    backgroundColor: '#dcdcdc',
-  },
-  tabText: {
-    fontWeight: 'bold',
-  },
-});
 
 const App = () => {
   const [region, setRegion] = useState({
@@ -90,9 +36,11 @@ const App = () => {
     latitudeDelta: 0.015,
     longitudeDelta: 0.0121,
   });
-  const mapViewRef = useRef(null);
-  const [locations, setLocations] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState(null);
+  const mapViewRef = useRef<MapView>(null);
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
+    null,
+  );
   const [activeTab, setActiveTab] = useState('description');
   const [visible, setVisible] = useState(false);
   const snapPoints = useMemo(() => ['70%'], []);
@@ -132,11 +80,11 @@ const App = () => {
         longitudeDelta: 0.0121,
       };
       setRegion(newRegion);
-      mapViewRef.current.animateToRegion(newRegion, 1000);
+      mapViewRef.current?.animateToRegion(newRegion, 1000);
     });
   };
 
-  const handleMarkerPress = location => {
+  const handleMarkerPress = (location: Location) => {
     setSelectedLocation(location);
     bottomSheetRef.current.expand();
   };
@@ -148,10 +96,10 @@ const App = () => {
 
   const handleChangeMapType = () => {
     const newMapType =
-      mapViewRef.current.props.provider === PROVIDER_GOOGLE
+      mapViewRef.current?.props.provider === PROVIDER_GOOGLE
         ? PROVIDER_GOOGLE
         : PROVIDER_DEFAULT;
-    mapViewRef.current.setMapType(newMapType);
+    mapViewRef.current?.mapType('standard');
   };
 
   const carouselItems = [
@@ -160,17 +108,17 @@ const App = () => {
     {title: 'Vị trí tái chế rác', icon: 'map-marker'},
   ];
 
-  const renderCarouselItem = ({item}: any) => {
+  const renderCarouselItem = (item: ListRenderItemInfo<CarouselItems>) => {
     return (
       <Chip
-        icon={item.icon}
+        icon={item.item.icon}
         style={{
           backgroundColor: 'white',
           borderRadius: 20,
           padding: 3,
           marginRight: 5,
         }}>
-        {item.title}
+        {item.item.title}
       </Chip>
     );
   };
@@ -182,7 +130,9 @@ const App = () => {
         ref={mapViewRef}
         provider={PROVIDER_GOOGLE}
         style={styles.map}
-        mapType="hybrid"
+        mapType="standard"
+        showsUserLocation
+        showsMyLocationButton={false}
         region={region}>
         {locations.map((location, index) =>
           location.latitude && location.longitude ? (
@@ -194,8 +144,8 @@ const App = () => {
               }}
               title={location.address}
               description={location.description}
+              icon={require('../assets/icons/trash1.png')}
               onPress={() => handleMarkerPress(location)}>
-              <Icon2 name="trash" size={40} color="red" />
               <Callout tooltip>
                 <Text>hi</Text>
               </Callout>
@@ -203,7 +153,7 @@ const App = () => {
           ) : null,
         )}
 
-        <Marker
+        {/* <Marker
           coordinate={{
             latitude: region.latitude,
             longitude: region.longitude,
@@ -211,7 +161,7 @@ const App = () => {
           title="Your Location"
           description="You are here">
           <Icon name="map-marker" size={30} color="blue" />
-        </Marker>
+        </Marker> */}
 
         <Circle
           center={{
@@ -230,9 +180,11 @@ const App = () => {
       <TouchableOpacity
         style={styles.locationButton}
         onPress={handleGetCurrentLocation}>
-        <Text>
-          <Icon name="location-arrow" size={30} color="black" />
-        </Text>
+        <Image
+          source={require('../assets/icons/focus.png')}
+          style={{width: 40, height: 40}}
+          resizeMode="contain"
+        />
       </TouchableOpacity>
       <TextInput
         style={{
@@ -370,5 +322,63 @@ const App = () => {
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  map: {
+    width: windowWidth,
+    height: windowHeight,
+  },
+  searchContainer: {
+    position: 'absolute',
+    top: 10,
+    left: 10,
+    right: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.0)',
+    borderRadius: 20,
+    padding: 10,
+    width: windowWidth - 20,
+  },
+  locationButton: {
+    position: 'absolute',
+    top: windowHeight * 0.7 + 60,
+    right: 20,
+    backgroundColor: 'white',
+    padding: 10,
+    borderRadius: 50,
+    width: 60,
+    height: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bottomSheetContent: {
+    padding: 20,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingVertical: 10,
+    backgroundColor: '#f2f2f2',
+  },
+  tabButton: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 5,
+  },
+  tabContent: {},
+  activeTab: {
+    backgroundColor: '#dcdcdc',
+  },
+  tabText: {
+    fontWeight: 'bold',
+  },
+});
 
 export default App;
