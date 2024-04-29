@@ -4,12 +4,13 @@ import BottomTabs from './BottomTabs';
 import EditProfileScreen from '../screens/EditProfileScreen';
 import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
-const AppStack = createNativeStackNavigator();
 import UserContext from '../context/UserContext';
 import ActivityScreen from '../screens/ActivityScreen';
 import AddLocationScreen from '../screens/AddLocationScreen';
 import {Alert} from 'react-native';
 import AddActivityScreen from '../screens/AddActivityScreen';
+
+const AppStack = createNativeStackNavigator();
 
 //CHUS YS
 // 0: guest(chua dang nhap), 1: user, 2: admin,3 volunteer
