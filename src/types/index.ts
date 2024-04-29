@@ -1,7 +1,7 @@
 export interface Location {
   address: string;
   description: string;
-  image: string;
+  image: string[];
   locationType: string;
   longitude: number;
   latitude: number;
