@@ -10,6 +10,7 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import LoadingContext from '../context/LoadingContext';
 import firestore from '@react-native-firebase/firestore';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 const ActivitiesListScreen = ({navigation}: any) => {
   const {setIsLoading} = React.useContext(LoadingContext);
@@ -70,19 +71,21 @@ const ActivitiesListScreen = ({navigation}: any) => {
   );
 
   return (
-    <LinearGradient
-      colors={['#FDFBFB', '#B4E0F9']}
-      style={activityStyles.background_container}>
-      <View style={activityStyles.container}>
-        <Text style={activityStyles.header}>Activities</Text>
-        <FlatList
-          data={activities}
-          renderItem={renderItem}
-          keyExtractor={item => item.id}
-          contentContainerStyle={activityStyles.activityList}
-        />
-      </View>
-    </LinearGradient>
+    <SafeAreaView style={{flex: 1}}>
+      <LinearGradient
+        colors={['#FDFBFB', '#B4E0F9']}
+        style={activityStyles.background_container}>
+        <View style={activityStyles.container}>
+          <Text style={activityStyles.header}>Activities</Text>
+          <FlatList
+            data={activities}
+            renderItem={renderItem}
+            keyExtractor={item => item.id}
+            contentContainerStyle={activityStyles.activityList}
+          />
+        </View>
+      </LinearGradient>
+    </SafeAreaView>
   );
 };
 

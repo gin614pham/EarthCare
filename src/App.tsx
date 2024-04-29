@@ -55,13 +55,17 @@ function App(): JSX.Element {
   };
 
   return (
-    <GestureHandlerRootView style={{flex: 1}}>
+    <GestureHandlerRootView>
+      <StatusBar
+        barStyle="dark-content"
+        backgroundColor="transparent"
+        translucent={true}
+      />
       <PaperProvider>
         <LoadingContext.Provider
           value={{isLoading: loading, setIsLoading: setLoading}}>
           <UserContext.Provider value={{user: user, setUser: setUser}}>
-            <NavigationContainer theme={theme}>
-              <StatusBar barStyle="dark-content" />
+            <NavigationContainer>
               <AppNavigation />
               {loading && <LoadingScreen />}
             </NavigationContainer>

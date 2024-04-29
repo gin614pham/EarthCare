@@ -1,5 +1,11 @@
 import React, {useEffect, useState} from 'react';
-import {View, Alert, StyleSheet, PermissionsAndroid} from 'react-native';
+import {
+  View,
+  Alert,
+  StyleSheet,
+  PermissionsAndroid,
+  StatusBar,
+} from 'react-native';
 import Map from '../components/Map';
 
 const HomeScreen = () => {

@@ -13,6 +13,7 @@ import auth from '@react-native-firebase/auth';
 import LoadingContext from '../context/LoadingContext';
 import firestore from '@react-native-firebase/firestore';
 import UserContext from '../context/UserContext';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 interface LoginFormType {
   email: string;
@@ -50,7 +51,7 @@ const LoginScreen = ({navigation}: any) => {
 
       Alert.alert('Thành công', 'Đăng nhập thành công');
     } catch (error) {
-      Alert.alert('Lỗi', 'Đăng nhập thất bại' + '\n' + error);
+      Alert.alert('Lỗi', error.message.replace(/\[.*?\]/, '').trim());
     } finally {
       setIsLoading(false);
     }
@@ -59,42 +60,49 @@ const LoginScreen = ({navigation}: any) => {
     setLoginForm({...loginForm, [name]: value});
   };
   return (
-    <LinearGradient
-      colors={['#FDFBFB', '#B4E0F9']}
-      style={loginStyles.background_container}>
-      <View style={loginStyles.container}>
-        <Text style={loginStyles.header}>Login</Text>
-        <View style={loginStyles.input_container}>
-          <TextInput
-            style={loginStyles.input}
-            placeholder="Email"
-            value={loginForm.email}
-            onChangeText={text => handleChange('email', text)}
-          />
-          <TextInput
-            secureTextEntry
-            style={loginStyles.input}
-            placeholder="Password"
-            value={loginForm.password}
-            onChangeText={text => handleChange('password', text)}
-          />
-          <View style={loginStyles.link}>
-            <Text style={loginStyles.linkText}>Forgot Password?</Text>
+    <SafeAreaView
+      style={{
+        flex: 1,
+      }}>
+      <LinearGradient
+        colors={['#FDFBFB', '#B4E0F9']}
+        style={loginStyles.background_container}>
+        <View style={loginStyles.container}>
+          <Text style={loginStyles.header}>Login</Text>
+          <View style={loginStyles.input_container}>
+            <TextInput
+              style={loginStyles.input}
+              placeholder="Email"
+              value={loginForm.email}
+              onChangeText={text => handleChange('email', text)}
+            />
+            <TextInput
+              secureTextEntry
+              style={loginStyles.input}
+              placeholder="Password"
+              value={loginForm.password}
+              onChangeText={text => handleChange('password', text)}
+            />
+            <View style={loginStyles.link}>
+              <Text style={loginStyles.linkText}>Forgot Password?</Text>
+            </View>
           </View>
+          <TouchableOpacity style={loginStyles.button} onPress={handleLogin}>
+            <Text style={loginStyles.button_text}>Login</Text>
+          </TouchableOpacity>
+          <Text style={loginStyles.text}>
+            Don't have an account?{' '}
+            <Text
+              style={loginStyles.linkText}
+              onPress={() =>
+                navigation.navigate('Register', {name: 'Register'})
+              }>
+              Register here
+            </Text>{' '}
+          </Text>
         </View>
-        <TouchableOpacity style={loginStyles.button} onPress={handleLogin}>
-          <Text style={loginStyles.button_text}>Login</Text>
-        </TouchableOpacity>
-        <Text style={loginStyles.text}>
-          Don't have an account?{' '}
-          <Text
-            style={loginStyles.linkText}
-            onPress={() => navigation.navigate('Register', {name: 'Register'})}>
-            Register here
-          </Text>{' '}
-        </Text>
-      </View>
-    </LinearGradient>
+      </LinearGradient>
+    </SafeAreaView>
   );
 };
 
