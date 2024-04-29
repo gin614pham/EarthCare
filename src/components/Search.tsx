@@ -107,12 +107,12 @@ const styles = StyleSheet.create({
   predictionText: {
     fontSize: 16,
     color: 'black',
-    padding: 10, // Thêm padding cho mỗi item
+    padding: 10,
   },
   separator: {
-    height: 1, // Độ dài của phần tách
+    height: 1,
 
-    padding: 5, // Thêm padding cho mỗi item
+    padding: 5,
   },
 });
 
