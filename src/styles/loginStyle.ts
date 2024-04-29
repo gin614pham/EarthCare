@@ -9,6 +9,7 @@ const loginStyles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'flex-start',
     paddingTop: 50,
+    paddingHorizontal: 10,
   },
   input_container: {
     width: '100%',
@@ -18,11 +19,11 @@ const loginStyles = StyleSheet.create({
   },
   input: {
     height: 50,
-    width: '90%',
     padding: 10,
     margin: 10,
     borderRadius: 10,
     backgroundColor: 'white',
+    width: '100%',
   },
   button: {
     alignItems: 'center',
@@ -80,7 +81,6 @@ const loginStyles = StyleSheet.create({
   },
   dropdown: {
     height: 50,
-    width: '90%',
     margin: 10,
     borderRadius: 10,
     backgroundColor: 'white',

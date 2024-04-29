@@ -173,135 +173,131 @@ const AddLocationScreen = ({navigation}: any) => {
     }));
   };
 
-  const handleSaveLocation = () => {
-    setModalVisible(false);
-  };
-
-  const setRegionAddF = (region: any) => {
-    setLocationAdd(region);
-  };
-
   return (
-    <View style={loginStyles.container}>
-      <View style={loginStyles.input_container}>
-        {/* <Modal visible={modalVisible} animationType="slide">
-          <View style={styles.modalContainer}>
-            <MapGoogle
-              setRegionAddF={(region: any) => {
-                setRegionAddF(region);
-              }}></MapGoogle>
-            <TouchableOpacity
-              style={styles.saveButton}
-              onPress={() => {
-                setModalVisible(false);
-                handleSaveLocation();
-              }}>
-              <Text style={styles.buttonText}>Save Location</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal> */}
-
-        <Text style={styles.text_header}>Address: </Text>
-        <View style={styles.input_address_container}>
-          <TextInput
-            style={loginStyles.input}
-            placeholder="Address"
-            value={locationInfo.address}
-            onChangeText={text => handleChange('address', text)}
-          />
-          <TouchableOpacity onPress={getCurrentPosition}>
-            <Image
-              resizeMode="contain"
-              source={require('../assets/icons/location.png')}
-              style={{width: 30, height: 30}}
-            />
-          </TouchableOpacity>
-        </View>
-        <Text style={styles.text_header}>Location Type: </Text>
-        <View style={loginStyles.dropdown}>
-          <Picker
-            selectedValue={locationInfo.locationType}
-            onValueChange={itemValue =>
-              handleChange('locationType', itemValue)
-            }>
-            <Picker.Item label="Select Location Type" value="" />
-            <Picker.Item label="Recycling Center" value="Recycling Center" />
-            <Picker.Item label="Garbage Dump" value="Garbage Dump" />
-            <Picker.Item label="Polluted Area" value="Polluted Area" />
-          </Picker>
-        </View>
-        <Text style={styles.text_header}>Description: </Text>
+    <View style={styles.container}>
+      <Text style={styles.text_header}>Address: </Text>
+      <View style={styles.input_container}>
         <TextInput
-          style={styles.multiline_input}
-          placeholder="Description"
-          multiline
-          numberOfLines={4}
-          value={locationInfo.description}
-          onChangeText={text => handleChange('description', text)}
+          style={styles.input}
+          placeholder="Address"
+          value={locationInfo.address}
+          onChangeText={text => handleChange('address', text)}
         />
-
-        <Text style={styles.text_header}>Image: </Text>
-        <View style={styles.image_container}>
-          <ScrollView horizontal={true} style={{padding: 5}}>
-            {locationInfo.image ? (
-              <>
-                {locationInfo.image.map((image, index) => (
-                  <View style={styles.image_preview} key={index}>
-                    <Image
-                      source={{uri: image}}
-                      style={{
-                        width: 90,
-                        height: 90,
-                        margin: 4,
-                        borderRadius: 6,
-                      }}
-                      resizeMethod="scale"
-                      resizeMode="cover"
-                      onLoadStart={() => {
-                        setIsImageLoading(true);
-                      }}
-                      onLoadEnd={() => {
-                        setIsImageLoading(false);
-                      }}
-                    />
-                    {isImageLoading && (
-                      <ActivityIndicator
-                        style={styles.loader}
-                        animating
-                        size="small"
-                        color="red"
-                      />
-                    )}
-                  </View>
-                ))}
-                {locationInfo.image.length < 5 && (
-                  <View style={styles.image_picker}>
-                    <TouchableOpacity
-                      style={styles.item_image_picker}
-                      onPress={handlePressAddImage}>
-                      <Image
-                        source={require('../assets/icons/image.png')}
-                        style={{width: 25, height: 25}}></Image>
-                      <Text>Add Image</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </>
-            ) : (
-              <View style={styles.image_picker}>
-                <TouchableOpacity
-                  style={styles.item_image_picker}
-                  onPress={handlePressAddImage}>
-                  <Image
-                    source={require('../assets/icons/image.png')}
-                    style={{width: 25, height: 25}}></Image>
-                  <Text>Add Image</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </ScrollView>
-        </View>
+        <TouchableOpacity onPress={getCurrentPosition}>
+          <Image
+            resizeMode="contain"
+            source={require('../assets/icons/location.png')}
+            style={{width: 30, height: 30}}
+          />
+        </TouchableOpacity>
       </View>
+      <Text style={styles.text_header}>Location Type: </Text>
+      <View style={styles.dropdown}>
+        <Picker
+          selectedValue={locationInfo.locationType}
+          onValueChange={itemValue => handleChange('locationType', itemValue)}>
+          <Picker.Item
+            label="Select Location Type"
+            value=""
+            style={{
+              fontSize: 15,
+            }}
+          />
+          <Picker.Item
+            label="Recycling Center"
+            value="Recycling Center"
+            style={{
+              fontSize: 15,
+            }}
+          />
+          <Picker.Item
+            label="Garbage Dump"
+            value="Garbage Dump"
+            style={{
+              fontSize: 15,
+            }}
+          />
+          <Picker.Item
+            label="Polluted Area"
+            value="Polluted Area"
+            style={{
+              fontSize: 15,
+            }}
+          />
+        </Picker>
+      </View>
+      <Text style={styles.text_header}>Description: </Text>
+      <TextInput
+        style={styles.multiline_input}
+        placeholder="Description"
+        multiline
+        numberOfLines={4}
+        value={locationInfo.description}
+        onChangeText={text => handleChange('description', text)}
+      />
+
+      <Text style={styles.text_header}>Image: </Text>
+      <View style={styles.image_container}>
+        <ScrollView horizontal={true} style={{padding: 5}}>
+          {locationInfo.image ? (
+            <>
+              {locationInfo.image.map((image, index) => (
+                <View style={styles.image_preview} key={index}>
+                  <Image
+                    source={{uri: image}}
+                    style={{
+                      width: 90,
+                      height: 90,
+                      margin: 4,
+                      borderRadius: 6,
+                    }}
+                    resizeMethod="scale"
+                    resizeMode="cover"
+                    onLoadStart={() => {
+                      setIsImageLoading(true);
+                    }}
+                    onLoadEnd={() => {
+                      setIsImageLoading(false);
+                    }}
+                  />
+                  {isImageLoading && (
+                    <ActivityIndicator
+                      style={styles.loader}
+                      animating
+                      size="small"
+                      color="red"
+                    />
+                  )}
+                </View>
+              ))}
+              {locationInfo.image.length < 5 && (
+                <View style={styles.image_picker}>
+                  <TouchableOpacity
+                    style={styles.item_image_picker}
+                    onPress={handlePressAddImage}>
+                    <Image
+                      source={require('../assets/icons/image.png')}
+                      style={{width: 25, height: 25}}></Image>
+                    <Text>Add Image</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </>
+          ) : (
+            <View style={styles.image_picker}>
+              <TouchableOpacity
+                style={styles.item_image_picker}
+                onPress={handlePressAddImage}>
+                <Image
+                  source={require('../assets/icons/image.png')}
+                  style={{width: 25, height: 25}}></Image>
+                <Text>Add Image</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </ScrollView>
+      </View>
+
       <TouchableOpacity style={loginStyles.button} onPress={handleAddLocation}>
         <Text style={loginStyles.button_text}>Add Location</Text>
       </TouchableOpacity>
@@ -312,13 +308,25 @@ const AddLocationScreen = ({navigation}: any) => {
 export default AddLocationScreen;
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 20,
+  },
   image_container: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
     marginBottom: 20,
     gap: 5,
     width: '100%',
+    backgroundColor: 'white',
+    borderRadius: 10,
+  },
+  input: {
+    height: 50,
+    paddingHorizontal: 10,
+    margin: 10,
+    borderRadius: 10,
+    backgroundColor: 'white',
+    width: '80%',
   },
   imagePreview: {
     width: 180,
@@ -356,17 +364,17 @@ const styles = StyleSheet.create({
   text_header: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginHorizontal: 20,
+    marginHorizontal: 10,
     alignSelf: 'flex-start',
+    marginTop: 20,
   },
   multiline_input: {
-    marginHorizontal: 20,
     marginVertical: 5,
     borderRadius: 10,
-    width: '90%',
     textAlign: 'left',
     textAlignVertical: 'top',
     backgroundColor: 'white',
+    paddingHorizontal: 15,
   },
   image_picker: {
     width: 100,
@@ -407,5 +415,22 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 6,
     margin: 4,
+  },
+  input_container: {
+    width: '100%',
+    backgroundColor: 'white',
+    display: 'flex',
+    flexDirection: 'row',
+    height: 50,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+  },
+  dropdown: {
+    height: 50,
+
+    borderRadius: 10,
+    backgroundColor: 'white',
   },
 });

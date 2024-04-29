@@ -97,7 +97,7 @@ const ActivitiesListScreen = ({navigation}: any) => {
             marginBottom: '30%',
           }}
           onPress={() => {
-            navigationCustom(user.role, navigation, 'AddActivityScreen');
+            navigationCustom(user?.role, navigation, 'AddActivityScreen');
           }}>
           <Text
             style={{
