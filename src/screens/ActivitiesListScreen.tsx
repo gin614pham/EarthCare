@@ -11,10 +11,13 @@ import LinearGradient from 'react-native-linear-gradient';
 import LoadingContext from '../context/LoadingContext';
 import firestore from '@react-native-firebase/firestore';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import UserContext from '../context/UserContext';
+import {navigationCustom} from '../navigation/AppNavigation';
 
 const ActivitiesListScreen = ({navigation}: any) => {
   const {setIsLoading} = React.useContext(LoadingContext);
   const [activities, setActivities] = useState([]);
+  const {user} = React.useContext(UserContext);
 
   const loadActivities = async () => {
     const activities2 = [
@@ -84,6 +87,27 @@ const ActivitiesListScreen = ({navigation}: any) => {
             contentContainerStyle={activityStyles.activityList}
           />
         </View>
+        <TouchableOpacity
+          style={{
+            backgroundColor: 'blue',
+            padding: 10,
+            alignItems: 'center',
+            borderRadius: 10,
+            marginTop: 10,
+            marginBottom: '30%',
+          }}
+          onPress={() => {
+            navigationCustom(user.role, navigation, 'AddActivityScreen');
+          }}>
+          <Text
+            style={{
+              color: 'white',
+              fontSize: 20,
+              fontWeight: 'bold',
+            }}>
+            Đăng ký hoạt động
+          </Text>
+        </TouchableOpacity>
       </LinearGradient>
     </SafeAreaView>
   );

@@ -1,6 +1,8 @@
-import {Image, StyleSheet, Text, View} from 'react-native';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React from 'react';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {navigationCustom} from '../navigation/AppNavigation';
+import UserContext from '../context/UserContext';
 
 const ActivityScreen = () => {
   const activity = {

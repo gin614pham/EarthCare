@@ -9,7 +9,10 @@ import UserContext from '../context/UserContext';
 import ActivityScreen from '../screens/ActivityScreen';
 import AddLocationScreen from '../screens/AddLocationScreen';
 import {Alert} from 'react-native';
+import AddActivityScreen from '../screens/AddActivityScreen';
 
+//CHUS YS
+// 0: guest(chua dang nhap), 1: user, 2: admin,3 volunteer
 const stack = [
   {
     name: 'BottomTabs',
@@ -44,6 +47,12 @@ const stack = [
   {
     name: 'AddLocation',
     component: AddLocationScreen,
+    options: {headerShown: true},
+    allowRoles: [1, 2, 3],
+  },
+  {
+    name: 'AddActivityScreen',
+    component: AddActivityScreen,
     options: {headerShown: true},
     allowRoles: [1, 2, 3],
   },
@@ -88,7 +97,6 @@ const AppNavigation = () => {
       setRole(0);
     }
   }, [user]);
-  // 0: guest, 1: user, 2: admin,3 volunteer
 
   return (
     <AppStack.Navigator screenOptions={{headerShown: false}}>
