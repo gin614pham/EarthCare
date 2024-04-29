@@ -34,17 +34,20 @@ const BottomTabs = ({navigation}: any) => {
     <Tab.Navigator
       screenOptions={{
         tabBarActiveTintColor: '#35B6FF',
-        tabBarShowLabel: false,
+        tabBarShowLabel: true,
+        tabBarLabelStyle: {fontSize: 12, fontWeight: 'bold', marginBottom: 5},
         tabBarHideOnKeyboard: true,
         headerShown: false,
         tabBarStyle: {
           position: 'absolute',
-          bottom: 20,
-          left: 20,
-          right: 20,
+          // bottom: 20,
+          // left: 20,
+          // right: 20,
           backgroundColor: '#ffffff',
           borderRadius: 10,
-          height: 80,
+          height: 70,
+          // làm cho center button không bị che mất
+          paddingVertical: 10,
           ...styles.shadow,
         },
       }}>

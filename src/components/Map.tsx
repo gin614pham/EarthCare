@@ -8,6 +8,7 @@ import {
   Image,
   ScrollView,
   ListRenderItemInfo,
+  Modal,
 } from 'react-native';
 import MapView, {
   Callout,
@@ -17,14 +18,15 @@ import MapView, {
   PROVIDER_DEFAULT,
 } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
-import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 import Icon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome icon library
-import Icon2 from 'react-native-vector-icons/Entypo'; // Import FontAwesome5 icon library
 import firestore from '@react-native-firebase/firestore';
 import BottomSheet from '@gorhom/bottom-sheet';
 import {FlatList, TextInput} from 'react-native-gesture-handler';
 import {Chip} from 'react-native-paper';
 import {CarouselItems, Location} from '../types';
+import Search from './Search';
+import {SafeAreaView} from 'react-native-safe-area-context';
+import ChangeMapType from './ChangeMapType';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -44,6 +46,7 @@ const App = () => {
   const [activeTab, setActiveTab] = useState('description');
   const [visible, setVisible] = useState(false);
   const snapPoints = useMemo(() => ['70%'], []);
+  const [mapType, setMapType] = useState('standard');
   const bottomSheetRef = useRef(null);
 
   useEffect(() => {
@@ -72,6 +75,9 @@ const App = () => {
   }, []);
 
   const handleGetCurrentLocation = () => {
+    // check lat long from place id
+    // const placeId = 'ChIJ7cmhLJm3j4AR0aG3ZVW4eXo';
+    // const url = `https://maps.googleapis.com/maps/api/geocode/json?place_id=${placeId}&key=${Config.GOOGLE_MAPS_API_KEY}`;
     Geolocation.getCurrentPosition(position => {
       const newRegion = {
         latitude: position.coords.latitude,
@@ -84,6 +90,18 @@ const App = () => {
     });
   };
 
+  const handleGetLocation = async (region: any) => {
+    const {latitude, longitude} = region;
+    const newRegion = {
+      latitude,
+      longitude,
+      latitudeDelta: 0.015,
+      longitudeDelta: 0.0121,
+    };
+    setRegion(newRegion);
+    mapViewRef.current?.animateToRegion(newRegion, 1000);
+  };
+
   const handleMarkerPress = (location: Location) => {
     setSelectedLocation(location);
     bottomSheetRef.current.expand();
@@ -94,12 +112,9 @@ const App = () => {
     setSelectedLocation(null);
   };
 
-  const handleChangeMapType = () => {
-    const newMapType =
-      mapViewRef.current?.props.provider === PROVIDER_GOOGLE
-        ? PROVIDER_GOOGLE
-        : PROVIDER_DEFAULT;
-    mapViewRef.current?.mapType('standard');
+  const handleChangeMapType = (mapType: string) => {
+    setMapType(mapType);
+    setVisible(false);
   };
 
   const carouselItems = [
@@ -130,7 +145,7 @@ const App = () => {
         ref={mapViewRef}
         provider={PROVIDER_GOOGLE}
         style={styles.map}
-        mapType="standard"
+        mapType={mapType}
         showsUserLocation
         showsMyLocationButton={false}
         region={region}>
@@ -174,9 +189,7 @@ const App = () => {
           strokeWidth={2}
         />
       </MapView>
-      <View style={styles.searchContainer}>
-        {/* Google Places Autocomplete */}
-      </View>
+
       <TouchableOpacity
         style={styles.locationButton}
         onPress={handleGetCurrentLocation}>
@@ -186,19 +199,7 @@ const App = () => {
           resizeMode="contain"
         />
       </TouchableOpacity>
-      <TextInput
-        style={{
-          position: 'absolute',
-          top: 30,
-          right: 20,
-          left: 20,
-          backgroundColor: 'white',
-          padding: 10,
-          borderRadius: 25,
-          paddingHorizontal: 20,
-          paddingVertical: 13,
-        }}
-        placeholder="Search for a location"></TextInput>
+      <Search handleGetLocation={handleGetLocation} />
       <View
         style={{
           position: 'absolute',
@@ -268,56 +269,10 @@ const App = () => {
           </View>
         )}
       </BottomSheet>
-      <View
-        style={{
-          position: 'absolute',
-          top: 180,
-          right: 20,
-          backgroundColor: 'white',
-          padding: 10,
-          borderRadius: 50,
-          shadowColor: 'black',
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.25,
-        }}>
-        <TouchableOpacity
-          style={{padding: 5}}
-          onPress={() => {
-            setVisible(!visible);
-          }}>
-          <Icon name="edit" size={20} color="black" />
-        </TouchableOpacity>
-        <View
-          style={{
-            position: 'absolute',
-            backgroundColor: 'white',
-            top: 40,
-            width: 300,
-            right: 10,
-            height: 300,
-            borderRadius: 10,
-            display: visible ? 'flex' : 'none',
-            padding: 10,
-          }}>
-          <Text style={{fontSize: 20, fontWeight: 'bold'}}>Loại bản đồ</Text>
-          <View style={{display: 'flex', flexDirection: 'row', gap: 10}}>
-            <TouchableOpacity
-              style={{
-                backgroundColor: 'white',
-                padding: 5,
-                borderRadius: 5,
-                borderWidth: 1,
-                borderColor: 'black',
-              }}>
-              <Text>Mặc định</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-
+      <ChangeMapType
+        mapType={mapType}
+        handleChangeMapType={handleChangeMapType}
+      />
       <View style={{position: 'absolute', top: 60, right: 20}}></View>
     </View>
   );
@@ -333,7 +288,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     position: 'absolute',
-    top: 10,
+    top: 20,
     left: 10,
     right: 10,
     backgroundColor: 'rgba(255, 255, 255, 0.0)',

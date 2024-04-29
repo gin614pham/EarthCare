@@ -32,7 +32,7 @@ const stack = [
   {
     name: 'EditProfile',
     component: EditProfileScreen,
-    options: {headerShown: false},
+    options: {headerShown: true},
     allowRoles: [1, 2, 3],
   },
   {

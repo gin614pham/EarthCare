@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
   centerMarker: {},
 });
 
-const MapGoogle = ({setRegionAddF}) => {
+const MapGoogle = ({setRegionAddF}: {setRegionAddF: (region: any) => void}) => {
   const [region, setRegion] = useState({
     latitude: 37.78825,
     longitude: -122.4324,
@@ -67,7 +67,7 @@ const MapGoogle = ({setRegionAddF}) => {
         longitudeDelta: 0.0121,
       };
       setRegion(newRegion);
-      mapViewRef.current.animateToRegion(newRegion, 1000);
+      mapViewRef.current?.animateToRegion(newRegion, 1000);
     });
   };
 

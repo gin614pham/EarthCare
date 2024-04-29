@@ -5,6 +5,7 @@ import ProfileScreen2 from './ProfileScreen2';
 import loginStyles from '../styles/loginStyle';
 import LinearGradient from 'react-native-linear-gradient';
 import UserContext from '../context/UserContext';
+import {SafeAreaView} from 'react-native-safe-area-context';
 
 const ProfileScreen = ({navigation}: any) => {
   const [role, setRole] = React.useState<number>(0);
@@ -19,19 +20,21 @@ const ProfileScreen = ({navigation}: any) => {
   }, [user]);
 
   return (
-    <LinearGradient colors={['#B4E0F9', '#FDFBFB']} style={{flex: 1}}>
-      <View style={loginStyles.container}>
-        {role ? (
-          <ProfileScreen2 navigation={navigation} />
-        ) : (
-          <View>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text> Login </Text>
-            </TouchableOpacity>
-          </View>
-        )}
-      </View>
-    </LinearGradient>
+    <SafeAreaView style={{flex: 1}}>
+      <LinearGradient colors={['#B4E0F9', '#FDFBFB']} style={{flex: 1}}>
+        <View style={loginStyles.container}>
+          {role ? (
+            <ProfileScreen2 navigation={navigation} />
+          ) : (
+            <View>
+              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                <Text> Login </Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      </LinearGradient>
+    </SafeAreaView>
   );
 };
 
