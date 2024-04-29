@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useMemo} from 'react';
+import React, {useState, useEffect, useRef, useMemo, useCallback} from 'react';
 import {
   StyleSheet,
   View,
@@ -6,30 +6,29 @@ import {
   TouchableOpacity,
   Dimensions,
   Image,
-  ScrollView,
   ListRenderItemInfo,
-  Modal,
 } from 'react-native';
 import MapView, {
   Callout,
   Circle,
   Marker,
   PROVIDER_GOOGLE,
-  PROVIDER_DEFAULT,
 } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
-import Icon from 'react-native-vector-icons/FontAwesome'; // Import FontAwesome icon library
 import firestore from '@react-native-firebase/firestore';
 import BottomSheet from '@gorhom/bottom-sheet';
-import {FlatList, TextInput} from 'react-native-gesture-handler';
+import {FlatList, ScrollView} from 'react-native-gesture-handler';
 import {Chip} from 'react-native-paper';
 import {CarouselItems, Location} from '../types';
 import Search from './Search';
-import {SafeAreaView} from 'react-native-safe-area-context';
 import ChangeMapType from './ChangeMapType';
+import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
+import ImageShow from './ImageShow';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
+
+const Tab = createMaterialTopTabNavigator();
 
 const App = () => {
   const [region, setRegion] = useState({
@@ -75,9 +74,6 @@ const App = () => {
   }, []);
 
   const handleGetCurrentLocation = () => {
-    // check lat long from place id
-    // const placeId = 'ChIJ7cmhLJm3j4AR0aG3ZVW4eXo';
-    // const url = `https://maps.googleapis.com/maps/api/geocode/json?place_id=${placeId}&key=${Config.GOOGLE_MAPS_API_KEY}`;
     Geolocation.getCurrentPosition(position => {
       const newRegion = {
         latitude: position.coords.latitude,
@@ -138,7 +134,15 @@ const App = () => {
     );
   };
 
-  // full screen including status bar
+  const renderDescription = useCallback(
+    (description: string) => (
+      <View>
+        <Text>{description}</Text>
+      </View>
+    ),
+    [],
+  );
+
   return (
     <View style={styles.container}>
       <MapView
@@ -167,17 +171,6 @@ const App = () => {
             </Marker>
           ) : null,
         )}
-
-        {/* <Marker
-          coordinate={{
-            latitude: region.latitude,
-            longitude: region.longitude,
-          }}
-          title="Your Location"
-          description="You are here">
-          <Icon name="map-marker" size={30} color="blue" />
-        </Marker> */}
-
         <Circle
           center={{
             latitude: region.latitude,
@@ -226,15 +219,14 @@ const App = () => {
         {selectedLocation && (
           <View style={styles.bottomSheetContent}>
             <Text style={{fontSize: 20, fontWeight: 'bold'}}>
-              Address:
-              {selectedLocation.address}
+              Address: {selectedLocation.address}
             </Text>
-
             <TouchableOpacity
               style={styles.closeButton}
               onPress={handleCloseBottomSheet}>
               <Text>Close</Text>
             </TouchableOpacity>
+
             <View style={styles.tabContainer}>
               <TouchableOpacity
                 style={[
@@ -253,17 +245,26 @@ const App = () => {
                 <Text style={styles.tabText}>Image</Text>
               </TouchableOpacity>
             </View>
+
             <View style={styles.tabContent}>
               {activeTab === 'description' && (
-                <ScrollView>
-                  <Text>{selectedLocation.description}</Text>
-                </ScrollView>
+                <View style={{marginBottom: 10}}>
+                  <ScrollView
+                    contentContainerStyle={{backgroundColor: 'white'}}>
+                    <Text style={{paddingBottom: 100}}>
+                      {selectedLocation.description}
+                    </Text>
+                  </ScrollView>
+                </View>
               )}
               {activeTab === 'image' && (
-                <Image
-                  source={{uri: selectedLocation.image}}
-                  style={{width: '100%', height: 200}}
-                />
+                <View style={{marginBottom: 10}}>
+                  <ScrollView
+                    style={styles.image_scroll_view}
+                    contentContainerStyle={{}}>
+                    <ImageShow images={selectedLocation.image} />
+                  </ScrollView>
+                </View>
               )}
             </View>
           </View>
@@ -310,6 +311,7 @@ const styles = StyleSheet.create({
   },
   bottomSheetContent: {
     padding: 20,
+    paddingBottom: 200,
   },
   closeButton: {
     position: 'absolute',
@@ -333,6 +335,9 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontWeight: 'bold',
+  },
+  image_scroll_view: {
+    marginBottom: 75,
   },
 });
 

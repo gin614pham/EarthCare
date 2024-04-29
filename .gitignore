@@ -67,3 +67,4 @@ yarn-error.log
 
 .env
 Android/gradle.properties
+yarn.lock
