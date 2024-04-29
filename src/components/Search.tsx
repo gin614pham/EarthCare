@@ -43,7 +43,11 @@ const Search = ({handleGetLocation}) => {
 
   const renderPrediction = ({item}) => (
     // <Text style={styles.predictionText}>{item.placePrediction.text.text}</Text>
-    <TouchableOpacity onPress={() => handleSelectPrediction(item)}>
+    <TouchableOpacity
+      onPress={() => handleSelectPrediction(item)}
+      style={{
+        flex: 1,
+      }}>
       <Text style={styles.predictionText}>
         {item.placePrediction.text.text}
       </Text>
