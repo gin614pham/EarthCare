@@ -6,6 +6,9 @@ export const getCurrentLocation = async (
   longitude: number,
 ) => {
   try {
+    if (Config.GOOGLE_MAPS_API_KEY === '') {
+      throw new Error('Google Maps API key is not set');
+    }
     const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${Config.GOOGLE_MAPS_API_KEY}`;
     const response = await axios.get(url);
     if (response.data.status === 'ZERO_RESULTS') {

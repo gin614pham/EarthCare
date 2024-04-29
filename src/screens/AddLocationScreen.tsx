@@ -8,16 +8,15 @@ import {
   Keyboard,
   Image,
   StyleSheet,
-  Modal,
   Platform,
   ActivityIndicator,
+  ScrollView,
 } from 'react-native';
 import loginStyles from '../styles/loginStyle';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import ImagePicker from 'react-native-image-crop-picker';
 import {Picker} from '@react-native-picker/picker';
-import MapGoogle from '../components/MapGoogle';
 import {Location} from '../types';
 import Geolocation from '@react-native-community/geolocation';
 import {getCurrentLocation} from '../api/googleMapAPI';
@@ -26,7 +25,7 @@ const AddLocationScreen = ({navigation}: any) => {
   const [locationInfo, setLocationInfo] = useState<Location>({
     address: '',
     description: '',
-    image: '',
+    image: [],
     locationType: '',
     longitude: 0,
     latitude: 0,
@@ -86,7 +85,7 @@ const AddLocationScreen = ({navigation}: any) => {
     }).then(async image => {
       setLocationInfo(prevState => ({
         ...prevState,
-        image: '',
+        image: [...prevState.image],
       }));
       const uploadUri =
         Platform.OS === 'ios' ? image.path.replace('file://', '') : image.path;
@@ -99,7 +98,7 @@ const AddLocationScreen = ({navigation}: any) => {
           const downloadUrl = await storageRef.getDownloadURL();
           setLocationInfo(prevState => ({
             ...prevState,
-            image: downloadUrl,
+            image: [...prevState.image, downloadUrl],
           }));
         })
         .catch(error => {
@@ -116,7 +115,7 @@ const AddLocationScreen = ({navigation}: any) => {
     }).then(async image => {
       setLocationInfo(prevState => ({
         ...prevState,
-        image: '',
+        image: [...prevState.image],
       }));
       const uploadUri =
         Platform.OS === 'ios' ? image.path.replace('file://', '') : image.path;
@@ -129,7 +128,7 @@ const AddLocationScreen = ({navigation}: any) => {
           const downloadUrl = await storageRef.getDownloadURL();
           setLocationInfo(prevState => ({
             ...prevState,
-            image: downloadUrl,
+            image: [...prevState.image, downloadUrl],
           }));
         })
         .catch(error => {
@@ -163,7 +162,7 @@ const AddLocationScreen = ({navigation}: any) => {
   const handleDeleteImage = () => {
     setLocationInfo(prevState => ({
       ...prevState,
-      image: '',
+      image: [],
     }));
   };
 
@@ -185,7 +184,7 @@ const AddLocationScreen = ({navigation}: any) => {
   return (
     <View style={loginStyles.container}>
       <View style={loginStyles.input_container}>
-        <Modal visible={modalVisible} animationType="slide">
+        {/* <Modal visible={modalVisible} animationType="slide">
           <View style={styles.modalContainer}>
             <MapGoogle
               setRegionAddF={(region: any) => {
@@ -200,7 +199,7 @@ const AddLocationScreen = ({navigation}: any) => {
               <Text style={styles.buttonText}>Save Location</Text>
             </TouchableOpacity>
           </View>
-        </Modal>
+        </Modal> */}
 
         <Text style={styles.text_header}>Address: </Text>
         <View style={styles.input_address_container}>
@@ -243,30 +242,52 @@ const AddLocationScreen = ({navigation}: any) => {
 
         <Text style={styles.text_header}>Image: </Text>
         <View style={styles.image_container}>
-          {locationInfo.image ? (
-            <>
-              <View style={styles.image_preview}>
-                <Image
-                  resizeMode="cover"
-                  resizeMethod="scale"
-                  onLoadStart={() => {
-                    setIsImageLoading(true);
-                  }}
-                  onLoadEnd={() => {
-                    setIsImageLoading(false);
-                  }}
-                  source={{uri: locationInfo.image}}
-                  style={{width: 90, height: 90, margin: 4, borderRadius: 6}}
-                />
-                {isImageLoading && (
-                  <ActivityIndicator
-                    style={styles.loader}
-                    animating
-                    size="small"
-                    color="red"
-                  />
+          <ScrollView horizontal={true} style={{padding: 5}}>
+            {locationInfo.image ? (
+              <>
+                {locationInfo.image.map((image, index) => (
+                  <View style={styles.image_preview} key={index}>
+                    <Image
+                      source={{uri: image}}
+                      style={{
+                        width: 90,
+                        height: 90,
+                        margin: 4,
+                        borderRadius: 6,
+                      }}
+                      resizeMethod="scale"
+                      resizeMode="cover"
+                      onLoadStart={() => {
+                        setIsImageLoading(true);
+                      }}
+                      onLoadEnd={() => {
+                        setIsImageLoading(false);
+                      }}
+                    />
+                    {isImageLoading && (
+                      <ActivityIndicator
+                        style={styles.loader}
+                        animating
+                        size="small"
+                        color="red"
+                      />
+                    )}
+                  </View>
+                ))}
+                {locationInfo.image.length < 5 && (
+                  <View style={styles.image_picker}>
+                    <TouchableOpacity
+                      style={styles.item_image_picker}
+                      onPress={handlePressAddImage}>
+                      <Image
+                        source={require('../assets/icons/image.png')}
+                        style={{width: 25, height: 25}}></Image>
+                      <Text>Add Image</Text>
+                    </TouchableOpacity>
+                  </View>
                 )}
-              </View>
+              </>
+            ) : (
               <View style={styles.image_picker}>
                 <TouchableOpacity
                   style={styles.item_image_picker}
@@ -277,19 +298,8 @@ const AddLocationScreen = ({navigation}: any) => {
                   <Text>Add Image</Text>
                 </TouchableOpacity>
               </View>
-            </>
-          ) : (
-            <View style={styles.image_picker}>
-              <TouchableOpacity
-                style={styles.item_image_picker}
-                onPress={handlePressAddImage}>
-                <Image
-                  source={require('../assets/icons/image.png')}
-                  style={{width: 25, height: 25}}></Image>
-                <Text>Add Image</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+            )}
+          </ScrollView>
         </View>
       </View>
       <TouchableOpacity style={loginStyles.button} onPress={handleAddLocation}>
@@ -308,6 +318,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
     gap: 5,
+    width: '100%',
   },
   imagePreview: {
     width: 180,
@@ -390,5 +401,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 35,
     left: 35,
+  },
+  image: {
+    width: 90,
+    height: 90,
+    borderRadius: 6,
+    margin: 4,
   },
 });
