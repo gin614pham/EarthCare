@@ -46,7 +46,7 @@ const style = StyleSheet.create({
     justifyContent: 'flex-start',
   },
   image_container: {
-    backgroundColor: 'red',
+    backgroundColor: 'green',
     margin: 5,
     borderRadius: 8,
     overflow: 'hidden',

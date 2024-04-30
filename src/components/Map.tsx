@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useMemo, useCallback} from 'react';
+import React, {useState, useEffect, useRef, useMemo} from 'react';
 import {
   StyleSheet,
   View,
@@ -22,13 +22,10 @@ import {Chip} from 'react-native-paper';
 import {CarouselItems, Location} from '../types';
 import Search from './Search';
 import ChangeMapType from './ChangeMapType';
-import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
 import ImageShow from './ImageShow';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
-
-const Tab = createMaterialTopTabNavigator();
 
 const App = () => {
   const [region, setRegion] = useState({
@@ -133,15 +130,6 @@ const App = () => {
       </Chip>
     );
   };
-
-  const renderDescription = useCallback(
-    (description: string) => (
-      <View>
-        <Text>{description}</Text>
-      </View>
-    ),
-    [],
-  );
 
   return (
     <View style={styles.container}>
@@ -320,18 +308,22 @@ const styles = StyleSheet.create({
   },
   tabContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
+    justifyContent: 'center',
     paddingVertical: 10,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: 'white',
   },
   tabButton: {
     paddingHorizontal: 20,
     paddingVertical: 10,
     borderRadius: 5,
+    width: '50%',
+    alignItems: 'center',
   },
   tabContent: {},
   activeTab: {
-    backgroundColor: '#dcdcdc',
+    backgroundColor: 'white',
+    borderBottomWidth: 2,
+    borderBottomColor: '#000000',
   },
   tabText: {
     fontWeight: 'bold',
