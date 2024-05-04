@@ -13,10 +13,18 @@ import firestore from '@react-native-firebase/firestore';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import UserContext from '../context/UserContext';
 import {navigationCustom} from '../navigation/AppNavigation';
+import Animated, {FadeIn, FadeInDown} from 'react-native-reanimated';
+
+interface item {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+}
 
 const ActivitiesListScreen = ({navigation}: any) => {
   const {setIsLoading} = React.useContext(LoadingContext);
-  const [activities, setActivities] = useState([]);
+  const [activities, setActivities] = useState<item[]>([]);
   const {user} = React.useContext(UserContext);
 
   const loadActivities = async () => {
@@ -45,6 +53,41 @@ const ActivitiesListScreen = ({navigation}: any) => {
         image:
           'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
       },
+      {
+        id: '4',
+        name: 'Chiến dịch dạch môi trường tại Núi eve',
+        description: 'Chien dich',
+        image:
+          'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
+      },
+      {
+        id: '5',
+        name: 'Chiến dịch dạch môi trường tại Núi eve',
+        description: 'Chien dich',
+        image:
+          'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
+      },
+      {
+        id: '6',
+        name: 'Chiến dịch dạch môi trường tại Núi eve',
+        description: 'Chien dich',
+        image:
+          'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
+      },
+      {
+        id: '7',
+        name: 'Chiến dịch dạch môi trường tại Núi eve',
+        description: 'Chien dich',
+        image:
+          'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
+      },
+      {
+        id: '8',
+        name: 'Chiến dịch dạch môi trường tại Núi eve',
+        description: 'Chien dich',
+        image:
+          'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
+      },
     ];
     setActivities(activities2);
   };
@@ -53,24 +96,25 @@ const ActivitiesListScreen = ({navigation}: any) => {
     loadActivities();
   }, []);
 
-  const renderItem = ({
-    item,
-  }: {
-    item: {id: string; name: string; description: string; image: string};
-  }) => (
-    <TouchableOpacity
-      style={activityStyles.activityItem}
-      onPress={() => {
-        navigation.navigate('ActivityScreen', {activityId: item.id});
-      }}>
-      <Image source={{uri: item.image}} style={activityStyles.activityImage} />
-      <View style={activityStyles.activityInfo}>
-        <Text style={activityStyles.activityName}>{item.name}</Text>
-        <Text style={activityStyles.activityDescription}>
-          {item.description}
-        </Text>
-      </View>
-    </TouchableOpacity>
+  const renderItem = ({item, index}: {item: item; index: number}) => (
+    <Animated.View entering={FadeInDown.duration(1000).delay(index * 150)}>
+      <TouchableOpacity
+        style={activityStyles.activityItem}
+        onPress={() => {
+          navigation.navigate('ActivityScreen', {activityId: item.id});
+        }}>
+        <Image
+          source={{uri: item.image}}
+          style={activityStyles.activityImage}
+        />
+        <View style={activityStyles.activityInfo}>
+          <Text style={activityStyles.activityName}>{item.name}</Text>
+          <Text style={activityStyles.activityDescription}>
+            {item.description}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 
   return (
@@ -80,34 +124,36 @@ const ActivitiesListScreen = ({navigation}: any) => {
         style={activityStyles.background_container}>
         <View style={activityStyles.container}>
           <Text style={activityStyles.header}>Activities</Text>
-          <FlatList
+          <Animated.FlatList
             data={activities}
-            renderItem={renderItem}
+            renderItem={({item, index}) => renderItem({item, index})}
             keyExtractor={item => item.id}
             contentContainerStyle={activityStyles.activityList}
           />
         </View>
-        <TouchableOpacity
-          style={{
-            backgroundColor: 'blue',
-            padding: 10,
-            alignItems: 'center',
-            borderRadius: 10,
-            marginTop: 10,
-            marginBottom: '30%',
-          }}
-          onPress={() => {
-            navigationCustom(user?.role, navigation, 'AddActivityScreen');
-          }}>
-          <Text
+        <Animated.View entering={FadeInDown.duration(1000).delay(500)}>
+          <TouchableOpacity
             style={{
-              color: 'white',
-              fontSize: 20,
-              fontWeight: 'bold',
+              backgroundColor: 'blue',
+              padding: 10,
+              alignItems: 'center',
+              borderRadius: 10,
+              marginTop: 10,
+              marginBottom: '30%',
+            }}
+            onPress={() => {
+              navigationCustom(user?.role, navigation, 'AddActivityScreen');
             }}>
-            Đăng ký hoạt động
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={{
+                color: 'white',
+                fontSize: 20,
+                fontWeight: 'bold',
+              }}>
+              Đăng ký hoạt động
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
       </LinearGradient>
     </SafeAreaView>
   );

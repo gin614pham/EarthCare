@@ -3,27 +3,36 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
   Image,
   StyleSheet,
   ScrollView,
+  View,
 } from 'react-native';
 import {getCurrentLocation} from '../api/googleMapAPI';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Geolocation from '@react-native-community/geolocation';
+import Animated, {
+  FadeInDown,
+  StretchInX,
+  ZoomIn,
+} from 'react-native-reanimated';
+import {Activity, DayOfWeek, durationAnimation} from '../types';
+import {launchImageLibrary} from 'react-native-image-picker';
 
 const AddActivityScreen = ({navigation}: any) => {
-  const [activityInfo, setActivityInfo] = useState({
+  const [activityInfo, setActivityInfo] = useState<Activity>({
+    id: '',
     name: '',
+    startDateTime: '',
+    endDateTime: '',
+    hoursStart: '',
     address: '',
-    startDate: '',
-    endDate: '',
     description: '',
     image: [],
-    latitude: 0,
-    longitude: 0,
-    latitudeDelta: 0,
-    longitudeDelta: 0,
+    location: {
+      longitude: 0,
+      latitude: 0,
+    },
   });
   const [showPickerDateStart, setShowPickerDateStart] = useState(false);
   const [showPickerDateEnd, setShowPickerDateEnd] = useState(false);
@@ -33,11 +42,14 @@ const AddActivityScreen = ({navigation}: any) => {
     console.log(activityInfo);
   }, [activityInfo]);
 
-  const handlePressAddImage = () => {
-    navigation.navigate('ImagePicker', {
-      setActivityInfo: setActivityInfo,
-      activityInfo: activityInfo,
-    });
+  const handlePressAddImage = async () => {
+    const response: any = await launchImageLibrary({mediaType: 'photo'});
+    if (!response.didCancel && response.assets) {
+      setActivityInfo({
+        ...activityInfo,
+        image: [response.assets[0].uri],
+      });
+    }
   };
 
   const handleAddActivity = () => {
@@ -48,15 +60,17 @@ const AddActivityScreen = ({navigation}: any) => {
     Geolocation.getCurrentPosition(position => {
       setActivityInfo({
         ...activityInfo,
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-        latitudeDelta: 0.015,
-        longitudeDelta: 0.0121,
+        location: {
+          longitude: position.coords.longitude,
+          latitude: position.coords.latitude,
+        },
+        // latitudeDelta: 0.015,
+        // longitudeDelta: 0.0121,
       });
     });
     const currentLocation = await getCurrentLocation(
-      activityInfo.latitude,
-      activityInfo.longitude,
+      activityInfo.location.latitude,
+      activityInfo.location.longitude,
     );
     setActivityInfo({...activityInfo, address: currentLocation});
   };
@@ -67,47 +81,53 @@ const AddActivityScreen = ({navigation}: any) => {
     const month = newDate.getMonth() + 1;
     const year = newDate.getFullYear();
     const dayOfWeek = newDate.getDay();
-    const dayOfWeekString = [
-      'Chủ Nhật',
-      'Thứ 2',
-      'Thứ 3',
-      'Thứ 4',
-      'Thứ 5',
-      'Thứ 6',
-      'Thứ 7',
-    ];
-    return `${dayOfWeekString[dayOfWeek]}, ${day}/${month}/${year}`;
+    return `${DayOfWeek.VI[dayOfWeek]}, ${day}/${month}/${year}`;
   };
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.inputContainer}>
+      <Animated.View
+        entering={FadeInDown.duration(durationAnimation.DURATION_300)}
+        style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Tên hoạt động"
+          placeholder="Name of activity"
           value={activityInfo.name}
           onChangeText={text => setActivityInfo({...activityInfo, name: text})}
         />
-      </View>
+      </Animated.View>
 
-      <View style={styles.inputContainer}>
+      <Animated.View
+        entering={FadeInDown.duration(durationAnimation.DURATION_300).delay(
+          durationAnimation.DELAY_1,
+        )}
+        style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Địa chỉ"
+          placeholder="Address"
           value={activityInfo.address}
           onChangeText={text =>
             setActivityInfo({...activityInfo, address: text})
           }
         />
         <TouchableOpacity onPress={getCurrentPosition}>
-          <Image
-            source={require('../assets/icons/location.png')}
-            style={styles.locationIcon}
-          />
+          <Animated.View
+            entering={StretchInX.duration(durationAnimation.DURATION_300).delay(
+              durationAnimation.DELAY_1 + durationAnimation.DURATION_300,
+            )}>
+            <Image
+              source={require('../assets/icons/location.png')}
+              style={styles.locationIcon}
+            />
+          </Animated.View>
         </TouchableOpacity>
-      </View>
+      </Animated.View>
 
-      <View style={styles.inputContainer}>
+      <Animated.View
+        entering={FadeInDown.duration(durationAnimation.DURATION_300).delay(
+          durationAnimation.DELAY_2,
+        )}
+        style={styles.inputContainer}>
         {showPickerDateStart && (
           <DateTimePicker
             value={new Date()}
@@ -115,10 +135,10 @@ const AddActivityScreen = ({navigation}: any) => {
             display="default"
             onChange={(event, selectedDate) => {
               setShowPickerDateStart(false);
-              if (selectedDate) {
+              if (event.type === 'set' && selectedDate) {
                 setActivityInfo({
                   ...activityInfo,
-                  startDate: selectedDate,
+                  startDateTime: formatDate(selectedDate.toString()),
                 });
               }
             }}
@@ -126,15 +146,17 @@ const AddActivityScreen = ({navigation}: any) => {
         )}
         <TextInput
           style={styles.input}
-          placeholder="Ngày bắt đầu"
-          value={
-            activityInfo.startDate ? formatDate(activityInfo.startDate) : ''
-          }
+          placeholder="Start date"
+          value={activityInfo.startDateTime ? activityInfo.startDateTime : ''}
           onFocus={() => setShowPickerDateStart(true)}
         />
-      </View>
+      </Animated.View>
 
-      <View style={styles.inputContainer}>
+      <Animated.View
+        entering={FadeInDown.duration(durationAnimation.DURATION_300).delay(
+          durationAnimation.DELAY_3,
+        )}
+        style={styles.inputContainer}>
         {showPickerTime && (
           <DateTimePicker
             value={new Date()}
@@ -142,10 +164,13 @@ const AddActivityScreen = ({navigation}: any) => {
             display="default"
             onChange={(event, selectedDate) => {
               setShowPickerTime(false);
-              if (selectedDate) {
+              if (event.type === 'set' && selectedDate) {
                 setActivityInfo({
                   ...activityInfo,
-                  startDate: selectedDate,
+                  hoursStart:
+                    selectedDate.getHours().toString() +
+                    ':' +
+                    selectedDate.getMinutes().toString(),
                 });
               }
             }}
@@ -153,17 +178,17 @@ const AddActivityScreen = ({navigation}: any) => {
         )}
         <TextInput
           style={styles.input}
-          placeholder="Chọn giờ"
-          value={
-            activityInfo.startDate
-              ? `${activityInfo.startDate.getHours()}:${activityInfo.startDate.getMinutes()}`
-              : ''
-          }
+          placeholder="Start time"
+          value={activityInfo.hoursStart ? activityInfo.hoursStart : ''}
           onFocus={() => setShowPickerTime(true)}
         />
-      </View>
+      </Animated.View>
 
-      <View style={styles.inputContainer}>
+      <Animated.View
+        entering={FadeInDown.duration(durationAnimation.DURATION_300).delay(
+          durationAnimation.DELAY_4,
+        )}
+        style={styles.inputContainer}>
         {showPickerDateEnd && (
           <DateTimePicker
             value={new Date()}
@@ -171,10 +196,10 @@ const AddActivityScreen = ({navigation}: any) => {
             display="default"
             onChange={(event, selectedDate) => {
               setShowPickerDateEnd(false);
-              if (selectedDate) {
+              if (event.type === 'set' && selectedDate) {
                 setActivityInfo({
                   ...activityInfo,
-                  endDate: selectedDate,
+                  endDateTime: formatDate(selectedDate.toString()),
                 });
               }
             }}
@@ -182,28 +207,84 @@ const AddActivityScreen = ({navigation}: any) => {
         )}
         <TextInput
           style={styles.input}
-          placeholder="Ngày kết thúc"
-          value={activityInfo.endDate ? formatDate(activityInfo.endDate) : ''}
+          placeholder="End date"
+          value={activityInfo.endDateTime ? activityInfo.endDateTime : ''}
           onFocus={() => setShowPickerDateEnd(true)}
         />
-      </View>
+      </Animated.View>
 
-      <View>
+      <Animated.View
+        entering={FadeInDown.duration(durationAnimation.DURATION_300).delay(
+          durationAnimation.DELAY_5,
+        )}>
         <TextInput
           style={styles.multilineInput}
           placeholder="Description"
           multiline
           numberOfLines={4}
+          maxLength={2000}
           value={activityInfo.description}
           onChangeText={text =>
             setActivityInfo({...activityInfo, description: text})
           }
         />
-      </View>
+      </Animated.View>
 
-      <TouchableOpacity style={styles.button} onPress={handleAddActivity}>
-        <Text style={styles.buttonText}>Add Activity</Text>
-      </TouchableOpacity>
+      {activityInfo.image.length > 0 ? (
+        <View style={styles.item_image_preview}>
+          {activityInfo.image.map((image, index) => (
+            <View style={styles.image_preview} key={index}>
+              <Image
+                source={{uri: image}}
+                style={{
+                  width: 90,
+                  height: 90,
+                  margin: 4,
+                  borderRadius: 6,
+                }}
+                resizeMethod="scale"
+                resizeMode="cover"
+              />
+            </View>
+          ))}
+          <Animated.View
+            entering={ZoomIn.duration(durationAnimation.DURATION_300).delay(
+              900,
+            )}
+            style={styles.image_picker}>
+            <TouchableOpacity
+              style={styles.item_image_picker}
+              onPress={handlePressAddImage}>
+              <Image
+                source={require('../assets/icons/image-editing.png')}
+                style={{width: 25, height: 25}}></Image>
+              <Text>Change Image</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      ) : (
+        <Animated.View
+          entering={ZoomIn.duration(durationAnimation.DURATION_300).delay(900)}
+          style={styles.image_picker}>
+          <TouchableOpacity
+            style={styles.item_image_picker}
+            onPress={handlePressAddImage}>
+            <Image
+              source={require('../assets/icons/image.png')}
+              style={{width: 25, height: 25}}></Image>
+            <Text>Add Image</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
+
+      <Animated.View
+        entering={FadeInDown.duration(durationAnimation.DURATION_300).delay(
+          durationAnimation.DELAY_6,
+        )}>
+        <TouchableOpacity style={styles.button} onPress={handleAddActivity}>
+          <Text style={styles.buttonText}>Add Activity</Text>
+        </TouchableOpacity>
+      </Animated.View>
     </ScrollView>
   );
 };
@@ -237,6 +318,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     backgroundColor: 'white',
+    textAlign: 'left',
+    textAlignVertical: 'top',
   },
   button: {
     backgroundColor: 'blue',
@@ -248,6 +331,41 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 16,
+  },
+  item_image_picker: {
+    width: 100,
+    height: 100,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  image_picker: {
+    width: 100,
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginHorizontal: 5,
+    marginVertical: 5,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: 'black',
+  },
+  image_preview: {
+    width: 100,
+    height: 100,
+    marginHorizontal: 5,
+    marginVertical: 5,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderStyle: 'solid',
+    borderColor: 'black',
+  },
+  item_image_preview: {
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
 });
 
