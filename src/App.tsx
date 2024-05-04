@@ -9,6 +9,7 @@ import LoadingContext from './context/LoadingContext';
 import UserContext from './context/UserContext';
 import firestore from '@react-native-firebase/firestore';
 import {PaperProvider} from 'react-native-paper';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
 
 function App(): JSX.Element {
   const [user, setUser] = useState<any>({});
@@ -65,10 +66,12 @@ function App(): JSX.Element {
         <LoadingContext.Provider
           value={{isLoading: loading, setIsLoading: setLoading}}>
           <UserContext.Provider value={{user: user, setUser: setUser}}>
-            <NavigationContainer>
-              <AppNavigation />
-              {loading && <LoadingScreen />}
-            </NavigationContainer>
+            <SafeAreaProvider>
+              <NavigationContainer>
+                <AppNavigation />
+                {loading && <LoadingScreen />}
+              </NavigationContainer>
+            </SafeAreaProvider>
           </UserContext.Provider>
         </LoadingContext.Provider>
       </PaperProvider>

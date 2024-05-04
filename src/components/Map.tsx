@@ -16,13 +16,23 @@ import MapView, {
 } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import firestore from '@react-native-firebase/firestore';
-import BottomSheet from '@gorhom/bottom-sheet';
+import BottomSheet, {WINDOW_WIDTH} from '@gorhom/bottom-sheet';
 import {FlatList, ScrollView} from 'react-native-gesture-handler';
 import {Chip} from 'react-native-paper';
 import {CarouselItems, Location} from '../types';
 import Search from './Search';
 import ChangeMapType from './ChangeMapType';
 import ImageShow from './ImageShow';
+import Animated, {
+  FadeInLeft,
+  FadeInRight,
+  FadeOutLeft,
+  FadeOutRight,
+  ZoomIn,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -43,7 +53,16 @@ const App = () => {
   const [visible, setVisible] = useState(false);
   const snapPoints = useMemo(() => ['70%'], []);
   const [mapType, setMapType] = useState('standard');
-  const bottomSheetRef = useRef(null);
+  const bottomSheetRef = useRef<BottomSheet>(null);
+
+  const translateX = useSharedValue<number>(0);
+  const durationAnimation = 300;
+
+  const animatedMoveStyle = useAnimatedStyle(() => ({
+    transform: [
+      {translateX: withTiming(translateX.value, {duration: durationAnimation})},
+    ],
+  }));
 
   useEffect(() => {
     Geolocation.getCurrentPosition(position => {
@@ -97,11 +116,11 @@ const App = () => {
 
   const handleMarkerPress = (location: Location) => {
     setSelectedLocation(location);
-    bottomSheetRef.current.expand();
+    bottomSheetRef.current?.expand();
   };
 
   const handleCloseBottomSheet = () => {
-    bottomSheetRef.current.collapse();
+    bottomSheetRef.current?.close();
     setSelectedLocation(null);
   };
 
@@ -206,7 +225,7 @@ const App = () => {
         enablePanDownToClose>
         {selectedLocation && (
           <View style={styles.bottomSheetContent}>
-            <Text style={{fontSize: 20, fontWeight: 'bold'}}>
+            <Text style={styles.title}>
               Address: {selectedLocation.address}
             </Text>
             <TouchableOpacity
@@ -217,42 +236,63 @@ const App = () => {
 
             <View style={styles.tabContainer}>
               <TouchableOpacity
-                style={[
-                  styles.tabButton,
-                  activeTab === 'description' && styles.activeTab,
-                ]}
-                onPress={() => setActiveTab('description')}>
-                <Text style={styles.tabText}>Description</Text>
+                activeOpacity={1}
+                style={[styles.tabButton]}
+                onPress={() => {
+                  setActiveTab('description');
+                  translateX.value = 0;
+                }}>
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === 'description' && {color: 'blue'},
+                  ]}>
+                  Description
+                </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
-                style={[
-                  styles.tabButton,
-                  activeTab === 'image' && styles.activeTab,
-                ]}
-                onPress={() => setActiveTab('image')}>
-                <Text style={styles.tabText}>Image</Text>
+                activeOpacity={1}
+                style={styles.tabButton}
+                onPress={() => {
+                  setActiveTab('image');
+                  translateX.value = (WINDOW_WIDTH - 40) / 2;
+                }}>
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === 'image' && {color: 'blue'},
+                  ]}>
+                  Image
+                </Text>
               </TouchableOpacity>
             </View>
 
+            <Animated.View style={[styles.moving_box, animatedMoveStyle]} />
+
             <View style={styles.tabContent}>
               {activeTab === 'description' && (
-                <View style={{marginBottom: 10}}>
+                <Animated.View
+                  exiting={FadeOutLeft.duration(durationAnimation)}
+                  entering={FadeInLeft.duration(durationAnimation).delay(150)}
+                  style={{marginBottom: 10}}>
                   <ScrollView
                     contentContainerStyle={{backgroundColor: 'white'}}>
-                    <Text style={{paddingBottom: 100}}>
+                    <Text style={styles.description}>
                       {selectedLocation.description}
                     </Text>
                   </ScrollView>
-                </View>
+                </Animated.View>
               )}
               {activeTab === 'image' && (
-                <View style={{marginBottom: 10}}>
-                  <ScrollView
-                    style={styles.image_scroll_view}
-                    contentContainerStyle={{}}>
+                <Animated.View
+                  entering={FadeInRight.duration(durationAnimation).delay(150)}
+                  exiting={FadeOutRight.duration(durationAnimation)}
+                  style={{marginBottom: 10}}>
+                  <ScrollView style={styles.image_scroll_view}>
                     <ImageShow images={selectedLocation.image} />
                   </ScrollView>
-                </View>
+                </Animated.View>
               )}
             </View>
           </View>
@@ -303,7 +343,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: 10,
+    top: 0,
     right: 10,
   },
   tabContainer: {
@@ -314,22 +354,36 @@ const styles = StyleSheet.create({
   },
   tabButton: {
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingTop: 10,
     borderRadius: 5,
     width: '50%',
     alignItems: 'center',
   },
   tabContent: {},
-  activeTab: {
-    backgroundColor: 'white',
-    borderBottomWidth: 2,
-    borderBottomColor: '#000000',
-  },
   tabText: {
     fontWeight: 'bold',
+    fontSize: 14,
+    color: 'gray',
   },
   image_scroll_view: {
     marginBottom: 75,
+  },
+  moving_box: {
+    width: (WINDOW_WIDTH - 40) / 2,
+    height: 2,
+    borderRadius: 10,
+    backgroundColor: 'blue',
+    marginBottom: 10,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  description: {
+    paddingBottom: 100,
+    fontSize: 16,
+    color: 'black',
   },
 });
 

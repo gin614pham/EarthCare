@@ -9,6 +9,7 @@ import ActivityScreen from '../screens/ActivityScreen';
 import AddLocationScreen from '../screens/AddLocationScreen';
 import {Alert} from 'react-native';
 import AddActivityScreen from '../screens/AddActivityScreen';
+import ImageDetailScreen from '../screens/other/ImageDetailScreen';
 
 const AppStack = createNativeStackNavigator();
 
@@ -56,6 +57,17 @@ const stack = [
     component: AddActivityScreen,
     options: {headerShown: true},
     allowRoles: [1, 2, 3],
+  },
+  {
+    name: 'ImageDetailScreen',
+    component: ImageDetailScreen,
+    options: {
+      headerShown: true,
+      headerTransparent: true,
+      title: '',
+      headerTintColor: 'white',
+    },
+    allowRoles: [0, 1, 2, 3],
   },
 ];
 const navigationCustom = (role: number, navigation: any, page: string) => {
