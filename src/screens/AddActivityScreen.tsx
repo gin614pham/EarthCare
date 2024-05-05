@@ -7,6 +7,8 @@ import {
   StyleSheet,
   ScrollView,
   View,
+  Keyboard,
+  ToastAndroid,
 } from 'react-native';
 import {getCurrentLocation} from '../api/googleMapAPI';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -18,6 +20,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import {Activity, DayOfWeek, durationAnimation} from '../types';
 import {launchImageLibrary} from 'react-native-image-picker';
+import firestore from '@react-native-firebase/firestore';
 
 const AddActivityScreen = ({navigation}: any) => {
   const [activityInfo, setActivityInfo] = useState<Activity>({
@@ -52,8 +55,20 @@ const AddActivityScreen = ({navigation}: any) => {
     }
   };
 
-  const handleAddActivity = () => {
-    console.log(activityInfo);
+  const handleAddActivity = async () => {
+    Keyboard.dismiss();
+    try {
+      await firestore()
+        .collection('activities')
+        .add({
+          ...activityInfo,
+          id: firestore().collection('activities').doc().id,
+        });
+      navigation.goBack();
+      ToastAndroid.show('Add activity success', ToastAndroid.SHORT);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const getCurrentPosition = async () => {

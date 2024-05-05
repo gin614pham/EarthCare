@@ -1,19 +1,13 @@
 import React, {useState, useEffect} from 'react';
-import {
-  Text,
-  View,
-  TouchableOpacity,
-  FlatList,
-  Image,
-  StyleSheet,
-} from 'react-native';
+import {Text, View, TouchableOpacity, Image, StyleSheet} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import LoadingContext from '../context/LoadingContext';
-import firestore from '@react-native-firebase/firestore';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import UserContext from '../context/UserContext';
 import {navigationCustom} from '../navigation/AppNavigation';
-import Animated, {FadeIn, FadeInDown} from 'react-native-reanimated';
+import Animated, {FadeInDown} from 'react-native-reanimated';
+import firestore from '@react-native-firebase/firestore';
+import {Activity} from '../types';
 
 interface item {
   id: string;
@@ -24,71 +18,47 @@ interface item {
 
 const ActivitiesListScreen = ({navigation}: any) => {
   const {setIsLoading} = React.useContext(LoadingContext);
-  const [activities, setActivities] = useState<item[]>([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const {user} = React.useContext(UserContext);
 
   const loadActivities = async () => {
-    const activities2 = [
-      {
-        id: '1',
-        name: 'Chiến dịch dọn vệ sinh môi trường tại Núi Everest',
-        description:
-          'Chiến dịch dọn vệ sinh môi trường tại Núi Everest được tổ chức bởi tổ chức môi trường Blue Sky.',
-        image:
-          'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
-      },
-      {
-        id: '2',
-        name: 'Chiến dịch trồng cây xanh tại Đà Nẵng',
-        description:
-          'Chiến dịch trồng cây xanh tại Đà Nẵng được tổ chức bởi tổ chức môi trường VKU.',
-        image:
-          'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
-      },
-      {
-        id: '3',
-        name: 'Chiến dịch tìm kiếm nguồn nước sạch tại Đà Nẵng',
-        description:
-          'Chiến dịch tìm kiếm nguồn nước sạch tại Đà Nẵng được tổ chức bởi tổ chức môi trường VKU.',
-        image:
-          'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
-      },
-      {
-        id: '4',
-        name: 'Chiến dịch dạch môi trường tại Núi eve',
-        description: 'Chien dich',
-        image:
-          'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
-      },
-      {
-        id: '5',
-        name: 'Chiến dịch dạch môi trường tại Núi eve',
-        description: 'Chien dich',
-        image:
-          'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
-      },
-      {
-        id: '6',
-        name: 'Chiến dịch dạch môi trường tại Núi eve',
-        description: 'Chien dich',
-        image:
-          'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
-      },
-      {
-        id: '7',
-        name: 'Chiến dịch dạch môi trường tại Núi eve',
-        description: 'Chien dich',
-        image:
-          'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
-      },
-      {
-        id: '8',
-        name: 'Chiến dịch dạch môi trường tại Núi eve',
-        description: 'Chien dich',
-        image:
-          'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
-      },
-    ];
+    const atv = await firestore().collection('activities').get();
+    const activities2 = atv.docs.map(doc => doc.data()) as Activity[];
+    const currentDate = new Date();
+    activities2.sort((a, b) => {
+      const startDayA = new Date(a.startDateTime);
+      const startDayB = new Date(b.startDateTime);
+      const endDayA = new Date(a.endDateTime);
+      const endDayB = new Date(b.endDateTime);
+
+      const isActivityActiveA =
+        startDayA <= currentDate && endDayA >= currentDate;
+      const isActivityActiveB =
+        startDayB <= currentDate && endDayB >= currentDate;
+      const isActivityPastA = endDayA < currentDate;
+      const isActivityPastB = endDayB < currentDate;
+      const isActivityFutureA = startDayA > currentDate;
+      const isActivityFutureB = startDayB > currentDate;
+      return isActivityActiveA && !isActivityActiveB
+        ? -1
+        : isActivityActiveB && !isActivityActiveA
+        ? 1
+        : isActivityActiveA && isActivityActiveB
+        ? 0
+        : isActivityPastA && !isActivityPastB
+        ? 1
+        : isActivityPastB && !isActivityPastA
+        ? -1
+        : isActivityPastA && isActivityPastB
+        ? 0
+        : isActivityFutureA && !isActivityFutureB
+        ? -1
+        : isActivityFutureB && !isActivityFutureA
+        ? 1
+        : isActivityFutureA && isActivityFutureB
+        ? 0
+        : 0;
+    });
     setActivities(activities2);
   };
 
@@ -96,7 +66,7 @@ const ActivitiesListScreen = ({navigation}: any) => {
     loadActivities();
   }, []);
 
-  const renderItem = ({item, index}: {item: item; index: number}) => (
+  const renderItem = ({item, index}: {item: Activity; index: number}) => (
     <Animated.View entering={FadeInDown.duration(1000).delay(index * 150)}>
       <TouchableOpacity
         style={activityStyles.activityItem}
@@ -104,7 +74,7 @@ const ActivitiesListScreen = ({navigation}: any) => {
           navigation.navigate('ActivityScreen', {activityId: item.id});
         }}>
         <Image
-          source={{uri: item.image}}
+          source={{uri: item.image[0]}}
           style={activityStyles.activityImage}
         />
         <View style={activityStyles.activityInfo}>
