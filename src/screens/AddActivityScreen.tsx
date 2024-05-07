@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   Text,
   TextInput,
@@ -25,10 +25,10 @@ import {launchImageLibrary} from 'react-native-image-picker';
 import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import MapGoogle from '../components/MapGoogle';
+import UserContext from '../context/UserContext';
 
 const AddActivityScreen = ({navigation}: any) => {
   const [activityInfo, setActivityInfo] = useState<Activity>({
-    id: '',
     name: '',
     startDateTime: '',
     endDateTime: '',
@@ -40,6 +40,7 @@ const AddActivityScreen = ({navigation}: any) => {
       longitude: 0,
       latitude: 0,
     },
+    userId: '',
   });
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [showPickerDateStart, setShowPickerDateStart] = useState(false);
@@ -47,6 +48,7 @@ const AddActivityScreen = ({navigation}: any) => {
   const [showPickerTime, setShowPickerTime] = useState(false);
   const [showMapModal, setShowMapModal] = useState(false);
   const [isLocationFetched, setIsLocationFetched] = useState(false);
+  const {user} = useContext(UserContext);
 
   useEffect(() => {
     console.log(activityInfo);
@@ -69,6 +71,7 @@ const AddActivityScreen = ({navigation}: any) => {
         setActivityInfo({
           ...activityInfo,
           image: [...activityInfo.image, url],
+          userId: user.uid,
         });
         setIsImageLoading(false);
       });
@@ -82,7 +85,6 @@ const AddActivityScreen = ({navigation}: any) => {
         .collection('activities')
         .add({
           ...activityInfo,
-          id: firestore().collection('activities').doc().id,
           createdAt: firestore.FieldValue.serverTimestamp(),
           updatedAt: firestore.FieldValue.serverTimestamp(),
         });

@@ -11,6 +11,11 @@ import firestore from '@react-native-firebase/firestore';
 import {PaperProvider} from 'react-native-paper';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import BackgroundFetch from 'react-native-background-fetch'; // Import thư viện BackgroundFetch
+import notifee, {
+  AndroidImportance,
+  AndroidVisibility,
+} from '@notifee/react-native'; // Import thư viện notifee
+import messaging from '@react-native-firebase/messaging';
 
 function App(): JSX.Element {
   const [user, setUser] = useState<any>({});
@@ -44,35 +49,66 @@ function App(): JSX.Element {
     fetchData();
 
     // Đăng ký BackgroundFetch
-    BackgroundFetch.configure(
-      {
-        minimumFetchInterval: 15, // Thời gian tối thiểu giữa mỗi lần chạy (phút)
-        enableHeadless: true, // Cho phép chạy khi ứng dụng không chạy
-        startOnBoot: true, // Bắt đầu chạy khi thiết bị khởi động
-      },
-      async () => {
-        console.log('[BackgroundFetch] Task completed');
+    // BackgroundFetch.configure(
+    //   {
+    //     minimumFetchInterval: 1, // Thời gian tối thiểu giữa mỗi lần chạy (phút)
+    //     enableHeadless: true, // Cho phép chạy khi ứng dụng không chạy
+    //     startOnBoot: true, // Bắt đầu chạy khi thiết bị khởi động
+    //   },
+    //   async () => {
+    //     console.log('[BackgroundFetch] Task completed');
 
-        // Kiểm tra hoạt động mới và hiển thị thông báo
-        await checkForNewActivitiesAndNotify();
+    //     // Kiểm tra hoạt động mới và hiển thị thông báo
+    //     await checkForNewActivitiesAndNotify();
 
-        // Kết thúc nhiệm vụ
-        BackgroundFetch.finish();
-      },
-      error => {
-        console.error('[BackgroundFetch] Error', error);
-      },
-    );
+    //     // Kết thúc nhiệm vụ
+    //     BackgroundFetch.finish();
+    //   },
+    //   error => {
+    //     console.error('[BackgroundFetch] Error', error);
+    //   },
+    // );
 
-    // Bắt đầu chạy BackgroundFetch
-    BackgroundFetch.start();
+    // // Bắt đầu chạy BackgroundFetch
+    // BackgroundFetch.start();
   }, []);
 
+  // // Hàm hiển thị thông báo
+
+  // async function onDisplayNotification() {
+  //   // Request permissions (required for iOS)
+  //   await notifee.requestPermission();
+
+  //   // Create a channel (required for Android)
+  //   const channelId = await notifee.createChannel({
+  //     id: 'important',
+  //     name: 'Important Notifications',
+  //     importance: AndroidImportance.HIGH,
+  //     lights: true,
+  //     vibration: true,
+  //     visibility: AndroidVisibility.PUBLIC,
+  //   });
+
+  //   // Display a notification
+  //   await notifee.displayNotification({
+  //     title: 'Notification Title',
+  //     body: 'Main body content of the notification',
+  //     android: {
+  //       channelId,
+  //       smallIcon: 'ic_launcher', // optional, defaults to 'ic_launcher'.
+  //       // pressAction is needed if you want the notification to open the app when pressed
+  //       pressAction: {
+  //         id: 'default',
+  //       },
+  //     },
+  //   });
+  // }
+
   // Hàm kiểm tra hoạt động mới và hiển thị thông báo
-  const checkForNewActivitiesAndNotify = async () => {
-    // Logic kiểm tra hoạt động mới ở đây
-    // Nếu có hoạt động mới, hiển thị thông báo
-  };
+  // const checkForNewActivitiesAndNotify = async () => {
+  //   // hiển thị thông báo giả
+  //   await onDisplayNotification();
+  // };
 
   const theme = {
     dark: false,

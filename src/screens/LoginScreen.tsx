@@ -14,6 +14,7 @@ import LoadingContext from '../context/LoadingContext';
 import firestore from '@react-native-firebase/firestore';
 import UserContext from '../context/UserContext';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import messaging from '@react-native-firebase/messaging';
 
 interface LoginFormType {
   email: string;
@@ -40,6 +41,27 @@ const LoginScreen = ({navigation}: any) => {
         .collection('users')
         .doc(userCredentials.user.uid)
         .get();
+      const token = await messaging().getToken();
+      const userToken = await firestore()
+        .collection('user-tokens')
+        .doc(userCredentials.user.uid)
+        .get();
+      if (!userToken.exists) {
+        await firestore()
+          .collection('user-tokens')
+          .doc(userCredentials.user.uid)
+          .set({
+            token: token,
+          });
+      } else {
+        await firestore()
+          .collection('user-tokens')
+          .doc(userCredentials.user.uid)
+          .update({
+            token: token,
+          });
+      }
+
       setUser({
         uid: userCredentials.user.uid,
         email: userCredentials.user.email,

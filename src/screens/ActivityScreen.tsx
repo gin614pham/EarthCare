@@ -1,32 +1,73 @@
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import React from 'react';
-import {SafeAreaView} from 'react-native-safe-area-context';
-import {navigationCustom} from '../navigation/AppNavigation';
+import React, {useContext, useState, useEffect} from 'react';
+import {View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
+import firestore from '@react-native-firebase/firestore';
 import UserContext from '../context/UserContext';
 
-const ActivityScreen = () => {
-  const activity = {
-    name: 'Xử lý rác thải sinh hoạt',
-    description:
-      'Vấn đề ô nhiễm môi trường do rác thải là một thách thức nghiêm trọng đối với các đô thị hiện nay. Việc xử lý rác thải chưa hiệu quả dẫn đến tình trạng ô nhiễm không chỉ ảnh hưởng đến sức khỏe cộng đồng mà còn làm suy giảm cảnh quan đô thị và thị trường du lịch.',
-    address: 'Số 1, Đại Cồ Việt, Hai Bà Trưng, Hà Nội',
-    startDateTime: '23/04/2024',
-    endDateTime: '25/04/2024',
-    hoursStart: '13:30',
-    image: 'https://pcd.monre.gov.vn/Data/images/TinTuc/t6/pic_b080_01.jpg',
+const ActivityScreen = ({route}: any) => {
+  const {activity} = route.params;
+  const {user} = useContext(UserContext);
+  const [interested, setInterested] = useState<boolean>(false);
+
+  useEffect(() => {
+    checkInterest();
+  }, []);
+
+  const checkInterest = async () => {
+    const interestedRef = await firestore()
+      .collection('interested_activities')
+      .where('userId', '==', user.uid)
+      .where('activityId', '==', activity.id)
+      .get();
+
+    if (!interestedRef.empty) {
+      setInterested(true);
+    }
   };
+
+  const handleInterestToggle = async () => {
+    try {
+      if (interested) {
+        await firestore()
+          .collection('interested_activities')
+          .where('userId', '==', user.uid)
+          .where('activityId', '==', activity.id)
+          .get()
+          .then(querySnapshot => {
+            querySnapshot.forEach(doc => {
+              doc.ref.delete();
+            });
+          });
+      } else {
+        await firestore().collection('interested_activities').add({
+          userId: user.uid,
+          activityId: activity.id,
+        });
+      }
+      setInterested(!interested);
+    } catch (error) {
+      console.error('Error toggling interest: ', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Image source={{uri: activity.image}} style={styles.image} />
+      <Image source={{uri: activity.image[0]}} style={styles.image} />
       <Text style={styles.name}>{activity.name}</Text>
       <Text style={styles.time}>
         {activity.startDateTime} - {activity.endDateTime}
       </Text>
       <Text style={styles.time}>Thời gian bắt đầu: {activity.hoursStart}</Text>
-      <Text style={styles.addressTitle}>Địa chỉ: </Text>
+      <Text style={styles.addressTitle}>Địa chỉ:</Text>
       <Text style={styles.address}>{activity.address}</Text>
       <Text style={styles.descriptionTitle}>Mô tả</Text>
       <Text style={styles.description}>{activity.description}</Text>
+      <TouchableOpacity
+        style={styles.interestedButton}
+        onPress={handleInterestToggle}>
+        <Text style={styles.interestedText}>
+          {interested ? 'Hủy quan tâm' : 'Quan tâm'}
+        </Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -77,5 +118,16 @@ const styles = StyleSheet.create({
     marginTop: 10,
     fontWeight: 'bold',
     color: 'black',
+  },
+  interestedButton: {
+    backgroundColor: 'blue',
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  interestedText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });

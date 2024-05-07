@@ -15,6 +15,7 @@ import LoadingContext from '../context/LoadingContext';
 import UserContext from '../context/UserContext';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {ROLE} from '../types';
+import messaging from '@react-native-firebase/messaging';
 
 interface RegisterFormType {
   name: string;
@@ -41,22 +42,28 @@ const RegisterScreen = ({navigation}: any) => {
     }
     try {
       setIsLoading(true);
-      const userCredentials = await auth()
-        .createUserWithEmailAndPassword(
-          registerForm.email,
-          registerForm.password,
-        )
-        .then(user => {
-          firestore().collection('users').doc(user.user.uid).set({
-            name: registerForm.name,
-            email: registerForm.email,
-            role: ROLE.USER,
-            avatar: 'none',
-          });
+      const userCredentials = await auth().createUserWithEmailAndPassword(
+        registerForm.email,
+        registerForm.password,
+      );
+
+      await firestore().collection('users').doc(userCredentials.user.uid).set({
+        name: registerForm.name,
+        email: registerForm.email,
+        role: ROLE.USER,
+        avatar: 'none',
+      });
+
+      const token = await messaging().getToken();
+      await firestore()
+        .collection('user-tokens')
+        .doc(userCredentials.user.uid)
+        .set({
+          token: token,
         });
 
       setUser({
-        uid: '',
+        uid: userCredentials.user.uid,
         email: registerForm.email,
         role: 1,
         avatar: 'none',

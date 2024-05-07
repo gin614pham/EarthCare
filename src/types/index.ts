@@ -13,7 +13,6 @@ export interface CarouselItems {
 }
 
 export interface Activity {
-  id: string;
   name: string;
   startDateTime: string;
   endDateTime: string;
@@ -25,6 +24,7 @@ export interface Activity {
     longitude: number;
     latitude: number;
   };
+  userId: string;
 }
 
 export interface User {
