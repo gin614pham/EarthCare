@@ -10,7 +10,12 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-const ChangeMapType = ({mapType, handleChangeMapType}) => {
+interface Props {
+  mapType: string;
+  handleChangeMapType: (mapType: string) => void;
+}
+
+const ChangeMapType = ({mapType, handleChangeMapType}: Props) => {
   const [visible, setVisible] = useState(false);
 
   const mapTypOptions = [
@@ -31,7 +36,7 @@ const ChangeMapType = ({mapType, handleChangeMapType}) => {
     },
   ];
 
-  const linkimage = option => {
+  const linkimage = (option: any) => {
     const imagePath = `../assets/images/maptype/${option.value}.png`;
     return imagePath;
   };

@@ -14,6 +14,7 @@ import firestore from '@react-native-firebase/firestore';
 import LoadingContext from '../context/LoadingContext';
 import UserContext from '../context/UserContext';
 import {SafeAreaView} from 'react-native-safe-area-context';
+import {ROLE} from '../types';
 
 interface RegisterFormType {
   name: string;
@@ -49,7 +50,7 @@ const RegisterScreen = ({navigation}: any) => {
           firestore().collection('users').doc(user.user.uid).set({
             name: registerForm.name,
             email: registerForm.email,
-            role: 1,
+            role: ROLE.USER,
             avatar: 'none',
           });
         });

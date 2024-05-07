@@ -1,76 +1,98 @@
 import React, {useState, useEffect} from 'react';
-import {
-  Text,
-  View,
-  TouchableOpacity,
-  FlatList,
-  Image,
-  StyleSheet,
-} from 'react-native';
+import {Text, View, TouchableOpacity, Image, StyleSheet} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import LoadingContext from '../context/LoadingContext';
-import firestore from '@react-native-firebase/firestore';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import UserContext from '../context/UserContext';
 import {navigationCustom} from '../navigation/AppNavigation';
+import Animated, {FadeInDown} from 'react-native-reanimated';
+import firestore from '@react-native-firebase/firestore';
+import {Activity} from '../types';
+import {useFocusEffect} from '@react-navigation/native';
+
+interface item {
+  id: string;
+  name: string;
+  description: string;
+  image: string;
+}
 
 const ActivitiesListScreen = ({navigation}: any) => {
   const {setIsLoading} = React.useContext(LoadingContext);
-  const [activities, setActivities] = useState([]);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const {user} = React.useContext(UserContext);
 
   const loadActivities = async () => {
-    const activities2 = [
-      {
-        id: '1',
-        name: 'Chiến dịch dọn vệ sinh môi trường tại Núi Everest',
-        description:
-          'Chiến dịch dọn vệ sinh môi trường tại Núi Everest được tổ chức bởi tổ chức môi trường Blue Sky.',
-        image:
-          'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
-      },
-      {
-        id: '2',
-        name: 'Chiến dịch trồng cây xanh tại Đà Nẵng',
-        description:
-          'Chiến dịch trồng cây xanh tại Đà Nẵng được tổ chức bởi tổ chức môi trường VKU.',
-        image:
-          'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
-      },
-      {
-        id: '3',
-        name: 'Chiến dịch tìm kiếm nguồn nước sạch tại Đà Nẵng',
-        description:
-          'Chiến dịch tìm kiếm nguồn nước sạch tại Đà Nẵng được tổ chức bởi tổ chức môi trường VKU.',
-        image:
-          'https://www.baokontum.com.vn/uploads/Image/2021/12/23/170154a.JPG',
-      },
-    ];
+    const atv = await firestore().collection('activities').get();
+    const activities2 = atv.docs.map(doc => doc.data()) as Activity[];
+    const currentDate = new Date();
+    activities2.sort((a, b) => {
+      const startDayA = new Date(a.startDateTime);
+      const startDayB = new Date(b.startDateTime);
+      const endDayA = new Date(a.endDateTime);
+      const endDayB = new Date(b.endDateTime);
+
+      const isActivityActiveA =
+        startDayA <= currentDate && endDayA >= currentDate;
+      const isActivityActiveB =
+        startDayB <= currentDate && endDayB >= currentDate;
+      const isActivityPastA = endDayA < currentDate;
+      const isActivityPastB = endDayB < currentDate;
+      const isActivityFutureA = startDayA > currentDate;
+      const isActivityFutureB = startDayB > currentDate;
+      return isActivityActiveA && !isActivityActiveB
+        ? -1
+        : isActivityActiveB && !isActivityActiveA
+        ? 1
+        : isActivityActiveA && isActivityActiveB
+        ? 0
+        : isActivityPastA && !isActivityPastB
+        ? 1
+        : isActivityPastB && !isActivityPastA
+        ? -1
+        : isActivityPastA && isActivityPastB
+        ? 0
+        : isActivityFutureA && !isActivityFutureB
+        ? -1
+        : isActivityFutureB && !isActivityFutureA
+        ? 1
+        : isActivityFutureA && isActivityFutureB
+        ? 0
+        : 0;
+    });
     setActivities(activities2);
   };
 
-  useEffect(() => {
-    loadActivities();
-  }, []);
+  // useEffect(() => {
+  //   loadActivities();
+  // }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      setIsLoading(true);
+      loadActivities();
+      setIsLoading(false);
+    }, []),
+  );
 
-  const renderItem = ({
-    item,
-  }: {
-    item: {id: string; name: string; description: string; image: string};
-  }) => (
-    <TouchableOpacity
-      style={activityStyles.activityItem}
-      onPress={() => {
-        navigation.navigate('ActivityScreen', {activityId: item.id});
-      }}>
-      <Image source={{uri: item.image}} style={activityStyles.activityImage} />
-      <View style={activityStyles.activityInfo}>
-        <Text style={activityStyles.activityName}>{item.name}</Text>
-        <Text style={activityStyles.activityDescription}>
-          {item.description}
-        </Text>
-      </View>
-    </TouchableOpacity>
+  const renderItem = ({item, index}: {item: Activity; index: number}) => (
+    <Animated.View entering={FadeInDown.duration(1000).delay(index * 150)}>
+      <TouchableOpacity
+        style={activityStyles.activityItem}
+        onPress={() => {
+          navigation.navigate('ActivityScreen', {activityId: item.id});
+        }}>
+        <Image
+          source={{uri: item.image[0]}}
+          style={activityStyles.activityImage}
+        />
+        <View style={activityStyles.activityInfo}>
+          <Text style={activityStyles.activityName}>{item.name}</Text>
+          <Text style={activityStyles.activityDescription}>
+            {item.description}
+          </Text>
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
   );
 
   return (
@@ -80,34 +102,36 @@ const ActivitiesListScreen = ({navigation}: any) => {
         style={activityStyles.background_container}>
         <View style={activityStyles.container}>
           <Text style={activityStyles.header}>Activities</Text>
-          <FlatList
+          <Animated.FlatList
             data={activities}
-            renderItem={renderItem}
+            renderItem={({item, index}) => renderItem({item, index})}
             keyExtractor={item => item.id}
             contentContainerStyle={activityStyles.activityList}
           />
         </View>
-        <TouchableOpacity
-          style={{
-            backgroundColor: 'blue',
-            padding: 10,
-            alignItems: 'center',
-            borderRadius: 10,
-            marginTop: 10,
-            marginBottom: '30%',
-          }}
-          onPress={() => {
-            navigationCustom(user?.role, navigation, 'AddActivityScreen');
-          }}>
-          <Text
+        <Animated.View entering={FadeInDown.duration(1000).delay(500)}>
+          <TouchableOpacity
             style={{
-              color: 'white',
-              fontSize: 20,
-              fontWeight: 'bold',
+              backgroundColor: 'blue',
+              padding: 10,
+              alignItems: 'center',
+              borderRadius: 10,
+              marginTop: 10,
+              marginBottom: '30%',
+            }}
+            onPress={() => {
+              navigationCustom(user?.role, navigation, 'AddActivityScreen');
             }}>
-            Đăng ký hoạt động
-          </Text>
-        </TouchableOpacity>
+            <Text
+              style={{
+                color: 'white',
+                fontSize: 20,
+                fontWeight: 'bold',
+              }}>
+              Đăng ký hoạt động
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
       </LinearGradient>
     </SafeAreaView>
   );

@@ -3,71 +3,86 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
   Image,
   StyleSheet,
   ScrollView,
-  Platform,
-  Alert,
+  View,
+  Keyboard,
+  ToastAndroid,
+  Modal,
 } from 'react-native';
 import {getCurrentLocation} from '../api/googleMapAPI';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Geolocation from '@react-native-community/geolocation';
-import {ActivityIndicator} from 'react-native-paper';
-import ImageCropPicker from 'react-native-image-crop-picker';
-import storage from '@react-native-firebase/storage';
+
+import Animated, {
+  FadeInDown,
+  StretchInX,
+  ZoomIn,
+} from 'react-native-reanimated';
+import {Activity, DayOfWeek, durationAnimation} from '../types';
+import {launchImageLibrary} from 'react-native-image-picker';
+import firestore from '@react-native-firebase/firestore';
+import MapGoogle from '../components/MapGoogle';
+
 const AddActivityScreen = ({navigation}: any) => {
-  const [activityInfo, setActivityInfo] = useState({
+  const [activityInfo, setActivityInfo] = useState<Activity>({
+    id: '',
     name: '',
+    startDateTime: '',
+    endDateTime: '',
+    hoursStart: '',
     address: '',
-    startDate: '',
-    endDate: '',
-    hour: 0,
     description: '',
     image: [],
-    latitude: 0,
-    longitude: 0,
-    latitudeDelta: 0,
-    longitudeDelta: 0,
+    location: {
+      longitude: 0,
+      latitude: 0,
+    },
   });
   const [isImageLoading, setIsImageLoading] = useState(false);
   const [showPickerDateStart, setShowPickerDateStart] = useState(false);
   const [showPickerDateEnd, setShowPickerDateEnd] = useState(false);
   const [showPickerTime, setShowPickerTime] = useState(false);
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [isLocationFetched, setIsLocationFetched] = useState(false);
 
   useEffect(() => {
     console.log(activityInfo);
   }, [activityInfo]);
 
-  // const handlePressAddImage = () => {
-  //   navigation.navigate('ImagePicker', {
-  //     setActivityInfo: setActivityInfo,
-  //     activityInfo: activityInfo,
-  //   });
-  // };
+  const handlePressAddImage = async () => {
+    const response: any = await launchImageLibrary({mediaType: 'photo'});
+    if (!response.didCancel && response.assets) {
+      setActivityInfo({
+        ...activityInfo,
+        image: [response.assets[0].uri],
+      });
+    }
+  };
 
-  const handleAddActivity = () => {
-    console.log(activityInfo);
+  const handleAddActivity = async () => {
+    Keyboard.dismiss();
+    try {
+      await firestore()
+        .collection('activities')
+        .add({
+          ...activityInfo,
+          id: firestore().collection('activities').doc().id,
+        });
+      navigation.goBack();
+      ToastAndroid.show('Add activity success', ToastAndroid.SHORT);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const getCurrentPosition = async () => {
-    Geolocation.getCurrentPosition(async position => {
-      setActivityInfo({
-        ...activityInfo,
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-        latitudeDelta: 0.0922,
-        longitudeDelta: 0.0421,
-      });
-      const currentLocation = await getCurrentLocation(
-        position.coords.latitude,
-        position.coords.longitude,
-      );
-      setActivityInfo({
-        ...activityInfo,
-        address: currentLocation,
-      });
-    });
+    const currentLocation = await getCurrentLocation(
+      activityInfo.location.latitude,
+      activityInfo.location.longitude,
+    );
+    setActivityInfo({...activityInfo, address: currentLocation});
   };
 
   const formatDate = (date: string) => {
@@ -76,129 +91,73 @@ const AddActivityScreen = ({navigation}: any) => {
     const month = newDate.getMonth() + 1;
     const year = newDate.getFullYear();
     const dayOfWeek = newDate.getDay();
-    const dayOfWeekString = [
-      'Chủ Nhật',
-      'Thứ 2',
-      'Thứ 3',
-      'Thứ 4',
-      'Thứ 5',
-      'Thứ 6',
-      'Thứ 7',
-    ];
-    return `${dayOfWeekString[dayOfWeek]}, ${day}/${month}/${year}`;
+    return `${DayOfWeek.VI[dayOfWeek]}, ${day}/${month}/${year}`;
   };
 
-  const handleChooseImage = () => {
-    ImageCropPicker.openPicker({
-      width: 300,
-      height: 400,
-      cropping: true,
-    }).then(async image => {
-      setActivityInfo(prevState => ({
-        ...prevState,
-        image: [...prevState.image],
-      }));
-      const uploadUri =
-        Platform.OS === 'ios' ? image.path.replace('file://', '') : image.path;
-      const filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
-      const storageRef = storage().ref(`avatars/${filename}`);
-      storageRef
-        .putFile(uploadUri)
-        .then(async () => {
-          setIsImageLoading(true);
-          const downloadUrl = await storageRef.getDownloadURL();
-          setActivityInfo(prevState => ({
-            ...prevState,
-            image: [...prevState.image, downloadUrl],
-          }));
-        })
-        .catch(error => {
-          console.error('Error uploading image: ', error);
-        });
+  const handleMapModalClose = () => {
+    setShowMapModal(false);
+    getCurrentPosition();
+  };
+
+  const handleMapModalSave = (region: any) => {
+    setActivityInfo({
+      ...activityInfo,
+      location: {
+        longitude: region.longitude,
+        latitude: region.latitude,
+      },
+      address: region.address,
     });
-  };
-
-  const handleTakePhoto = () => {
-    ImageCropPicker.openCamera({
-      width: 300,
-      height: 400,
-      cropping: true,
-    }).then(async image => {
-      setActivityInfo(prevState => ({
-        ...prevState,
-        image: [...prevState.image],
-      }));
-      const uploadUri =
-        Platform.OS === 'ios' ? image.path.replace('file://', '') : image.path;
-      const filename = uploadUri.substring(uploadUri.lastIndexOf('/') + 1);
-      const storageRef = storage().ref(`avatars/${filename}`);
-      storageRef
-        .putFile(uploadUri)
-        .then(async () => {
-          setIsImageLoading(true);
-          const downloadUrl = await storageRef.getDownloadURL();
-          setActivityInfo(prevState => ({
-            ...prevState,
-            image: [...prevState.image, downloadUrl],
-          }));
-        })
-        .catch(error => {
-          console.error('Error uploading image: ', error);
-        });
-    });
-  };
-
-  const handlePressAddImage = () => {
-    Alert.alert(
-      'Choose Image',
-      '',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Camera',
-          onPress: handleTakePhoto,
-        },
-        {
-          text: 'Gallery',
-          onPress: handleChooseImage,
-        },
-      ],
-      {cancelable: true},
-    );
   };
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.inputContainer}>
+      <Animated.View
+        entering={FadeInDown.duration(durationAnimation.DURATION_300)}
+        style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Tên hoạt động"
+          placeholder="Name of activity"
           value={activityInfo.name}
           onChangeText={text => setActivityInfo({...activityInfo, name: text})}
         />
-      </View>
+      </Animated.View>
 
-      <View style={styles.inputContainer}>
+      <Animated.View
+        entering={FadeInDown.duration(durationAnimation.DURATION_300).delay(
+          durationAnimation.DELAY_1,
+        )}
+        style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Địa chỉ"
+          placeholder="Address"
           value={activityInfo.address}
           onChangeText={text =>
             setActivityInfo({...activityInfo, address: text})
           }
         />
-        <TouchableOpacity onPress={getCurrentPosition}>
-          <Image
-            source={require('../assets/icons/location.png')}
-            style={styles.locationIcon}
-          />
-        </TouchableOpacity>
-      </View>
 
-      <View style={styles.inputContainer}>
+        <Animated.View
+          entering={StretchInX.duration(durationAnimation.DURATION_300).delay(
+            durationAnimation.DELAY_1 + durationAnimation.DURATION_300,
+          )}>
+          <TouchableOpacity
+            onPress={() => {
+              setShowMapModal(true);
+            }}>
+            <Image
+              source={require('../assets/icons/location.png')}
+              style={styles.locationIcon}
+            />
+          </TouchableOpacity>
+        </Animated.View>
+      </Animated.View>
+
+      <Animated.View
+        entering={FadeInDown.duration(durationAnimation.DURATION_300).delay(
+          durationAnimation.DELAY_2,
+        )}
+        style={styles.inputContainer}>
         {showPickerDateStart && (
           <DateTimePicker
             value={new Date()}
@@ -206,10 +165,10 @@ const AddActivityScreen = ({navigation}: any) => {
             display="default"
             onChange={(event, selectedDate) => {
               setShowPickerDateStart(false);
-              if (selectedDate) {
+              if (event.type === 'set' && selectedDate) {
                 setActivityInfo({
                   ...activityInfo,
-                  startDate: selectedDate,
+                  startDateTime: formatDate(selectedDate.toString()),
                 });
               }
             }}
@@ -217,15 +176,17 @@ const AddActivityScreen = ({navigation}: any) => {
         )}
         <TextInput
           style={styles.input}
-          placeholder="Ngày bắt đầu"
-          value={
-            activityInfo.startDate ? formatDate(activityInfo.startDate) : ''
-          }
+          placeholder="Start date"
+          value={activityInfo.startDateTime ? activityInfo.startDateTime : ''}
           onFocus={() => setShowPickerDateStart(true)}
         />
-      </View>
+      </Animated.View>
 
-      <View style={styles.inputContainer}>
+      <Animated.View
+        entering={FadeInDown.duration(durationAnimation.DURATION_300).delay(
+          durationAnimation.DELAY_3,
+        )}
+        style={styles.inputContainer}>
         {showPickerTime && (
           <DateTimePicker
             value={new Date()}
@@ -233,10 +194,13 @@ const AddActivityScreen = ({navigation}: any) => {
             display="default"
             onChange={(event, selectedDate) => {
               setShowPickerTime(false);
-              if (selectedDate) {
+              if (event.type === 'set' && selectedDate) {
                 setActivityInfo({
                   ...activityInfo,
-                  startDate: selectedDate,
+                  hoursStart:
+                    selectedDate.getHours().toString() +
+                    ':' +
+                    selectedDate.getMinutes().toString(),
                 });
               }
             }}
@@ -244,17 +208,17 @@ const AddActivityScreen = ({navigation}: any) => {
         )}
         <TextInput
           style={styles.input}
-          placeholder="Chọn giờ"
-          value={
-            activityInfo.startDate
-              ? `${activityInfo.startDate.getHours()}:${activityInfo.startDate.getMinutes()}`
-              : ''
-          }
+          placeholder="Start time"
+          value={activityInfo.hoursStart ? activityInfo.hoursStart : ''}
           onFocus={() => setShowPickerTime(true)}
         />
-      </View>
+      </Animated.View>
 
-      <View style={styles.inputContainer}>
+      <Animated.View
+        entering={FadeInDown.duration(durationAnimation.DURATION_300).delay(
+          durationAnimation.DELAY_4,
+        )}
+        style={styles.inputContainer}>
         {showPickerDateEnd && (
           <DateTimePicker
             value={new Date()}
@@ -262,10 +226,10 @@ const AddActivityScreen = ({navigation}: any) => {
             display="default"
             onChange={(event, selectedDate) => {
               setShowPickerDateEnd(false);
-              if (selectedDate) {
+              if (event.type === 'set' && selectedDate) {
                 setActivityInfo({
                   ...activityInfo,
-                  endDate: selectedDate,
+                  endDateTime: formatDate(selectedDate.toString()),
                 });
               }
             }}
@@ -273,87 +237,103 @@ const AddActivityScreen = ({navigation}: any) => {
         )}
         <TextInput
           style={styles.input}
-          placeholder="Ngày kết thúc"
-          value={activityInfo.endDate ? formatDate(activityInfo.endDate) : ''}
+          placeholder="End date"
+          value={activityInfo.endDateTime ? activityInfo.endDateTime : ''}
           onFocus={() => setShowPickerDateEnd(true)}
         />
-      </View>
+      </Animated.View>
 
-      <View>
+      <Animated.View
+        entering={FadeInDown.duration(durationAnimation.DURATION_300).delay(
+          durationAnimation.DELAY_5,
+        )}>
         <TextInput
           style={styles.multilineInput}
           placeholder="Description"
           multiline
           numberOfLines={4}
+          maxLength={2000}
           value={activityInfo.description}
           onChangeText={text =>
             setActivityInfo({...activityInfo, description: text})
           }
         />
-      </View>
-      <View style={styles.image_container}>
-        <ScrollView horizontal={true} style={{padding: 5}}>
-          {activityInfo.image.length > 0 ? (
-            <>
-              {activityInfo.image.map((image, index) => (
-                <View style={styles.image_preview} key={index}>
-                  <Image
-                    source={{uri: image}}
-                    style={{
-                      width: 90,
-                      height: 90,
-                      margin: 4,
-                      borderRadius: 6,
-                    }}
-                    resizeMethod="scale"
-                    resizeMode="cover"
-                    onLoadStart={() => {
-                      setIsImageLoading(true);
-                    }}
-                    onLoadEnd={() => {
-                      setIsImageLoading(false);
-                    }}
-                  />
-                  {isImageLoading && (
-                    <ActivityIndicator
-                      style={styles.loader}
-                      animating
-                      size="small"
-                      color="red"
-                    />
-                  )}
-                </View>
-              ))}
-              {activityInfo.image.length < 5 && (
-                <View style={styles.image_picker}>
-                  <TouchableOpacity
-                    style={styles.item_image_picker}
-                    onPress={handlePressAddImage}>
-                    <Image
-                      source={require('../assets/icons/image.png')}
-                      style={{width: 25, height: 25}}></Image>
-                    <Text>Add Image</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
-            </>
-          ) : (
-            <View style={styles.image_picker}>
-              <TouchableOpacity
-                style={styles.item_image_picker}
-                onPress={handlePressAddImage}>
-                <Image
-                  source={require('../assets/icons/image.png')}
-                  style={{width: 25, height: 25}}></Image>
-                <Text>Add Image</Text>
-              </TouchableOpacity>
+      </Animated.View>
+
+      {activityInfo.image.length > 0 ? (
+        <View style={styles.item_image_preview}>
+          {activityInfo.image.map((image, index) => (
+            <View style={styles.image_preview} key={index}>
+              <Image
+                source={{uri: image}}
+                style={{
+                  width: 90,
+                  height: 90,
+                  margin: 4,
+                  borderRadius: 6,
+                }}
+                resizeMethod="scale"
+                resizeMode="cover"
+              />
             </View>
-          )}
-        </ScrollView>
-      </View>
-      <TouchableOpacity style={styles.button} onPress={handleAddActivity}>
-        <Text style={styles.buttonText}>Add Activity</Text>
-      </TouchableOpacity>
+          ))}
+          <Animated.View
+            entering={ZoomIn.duration(durationAnimation.DURATION_300).delay(
+              900,
+            )}
+            style={styles.image_picker}>
+            <TouchableOpacity
+              style={styles.item_image_picker}
+              onPress={handlePressAddImage}>
+              <Image
+                source={require('../assets/icons/image-editing.png')}
+                style={{width: 25, height: 25}}></Image>
+              <Text>Change Image</Text>
+            </TouchableOpacity>
+          </Animated.View>
+        </View>
+      ) : (
+        <Animated.View
+          entering={ZoomIn.duration(durationAnimation.DURATION_300).delay(900)}
+          style={styles.image_picker}>
+          <TouchableOpacity
+            style={styles.item_image_picker}
+            onPress={handlePressAddImage}>
+            <Image
+              source={require('../assets/icons/image.png')}
+              style={{width: 25, height: 25}}></Image>
+            <Text>Add Image</Text>
+          </TouchableOpacity>
+        </Animated.View>
+      )}
+
+      <Animated.View
+        entering={FadeInDown.duration(durationAnimation.DURATION_300).delay(
+          durationAnimation.DELAY_6,
+        )}>
+        <TouchableOpacity style={styles.button} onPress={handleAddActivity}>
+          <Text style={styles.buttonText}>Add Activity</Text>
+        </TouchableOpacity>
+      </Animated.View>
+      <Modal
+        animationType="slide"
+        transparent={false}
+        visible={showMapModal}
+        onRequestClose={handleMapModalClose}>
+        <MapGoogle setRegionAddF={handleMapModalSave} />
+        <TouchableOpacity
+          style={{
+            position: 'absolute',
+            bottom: 20,
+            alignSelf: 'center',
+            backgroundColor: 'white',
+            padding: 10,
+            borderRadius: 10,
+          }}
+          onPress={handleMapModalClose}>
+          <Text style={{fontSize: 20, color: 'black'}}>Lưu vị trí</Text>
+        </TouchableOpacity>
+      </Modal>
     </ScrollView>
   );
 };
@@ -387,6 +367,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     backgroundColor: 'white',
+    textAlign: 'left',
+    textAlignVertical: 'top',
   },
   button: {
     backgroundColor: 'blue',
@@ -398,6 +380,13 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: 16,
+  },
+  item_image_picker: {
+    width: 100,
+    height: 100,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   image_picker: {
     width: 100,
@@ -421,31 +410,11 @@ const styles = StyleSheet.create({
     borderStyle: 'solid',
     borderColor: 'black',
   },
-  item_image_picker: {
-    width: 100,
-    height: 100,
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loader: {
-    position: 'absolute',
-    top: 35,
-    left: 35,
-  },
-  image: {
-    width: 90,
-    height: 90,
-    borderRadius: 6,
-    margin: 4,
-  },
-  image_container: {
-    flexDirection: 'row',
-    marginBottom: 20,
-    gap: 5,
+  item_image_preview: {
     width: '100%',
-    backgroundColor: 'white',
-    borderRadius: 10,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
   },
 });
 

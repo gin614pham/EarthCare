@@ -13,17 +13,31 @@ import MapView, {
   Circle,
   Marker,
   PROVIDER_GOOGLE,
+  Polygon,
 } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import firestore from '@react-native-firebase/firestore';
-import BottomSheet from '@gorhom/bottom-sheet';
+import BottomSheet, {WINDOW_WIDTH} from '@gorhom/bottom-sheet';
 import {FlatList, ScrollView} from 'react-native-gesture-handler';
 import {Chip} from 'react-native-paper';
 import {CarouselItems, Location} from '../types';
 import Search from './Search';
 import ChangeMapType from './ChangeMapType';
 import ImageShow from './ImageShow';
+import Animated, {
+  FadeInLeft,
+  FadeInRight,
+  FadeOutLeft,
+  FadeOutRight,
+  ZoomIn,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 import LottieView from 'lottie-react-native';
+import Config from 'react-native-config';
+import MapViewDirections from 'react-native-maps-directions';
+import {getDistance} from 'geolib';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -43,8 +57,26 @@ const App = () => {
   const [activeTab, setActiveTab] = useState('description');
   const [visible, setVisible] = useState(false);
   const snapPoints = useMemo(() => ['70%'], []);
+  const snapPoints2 = useMemo(() => ['30%'], []);
   const [mapType, setMapType] = useState('standard');
-  const bottomSheetRef = useRef(null);
+  const bottomSheetRef = useRef<BottomSheet>(null);
+  const bottomSheetRef2 = useRef<BottomSheet>(null);
+  const [destination, setDestination] = useState({
+    latitude: null,
+    longitude: null,
+  });
+  const [durationToDestination, setDurationToDestination] = useState<
+    number | null
+  >(null);
+
+  const translateX = useSharedValue<number>(0);
+  const durationAnimation = 300;
+
+  const animatedMoveStyle = useAnimatedStyle(() => ({
+    transform: [
+      {translateX: withTiming(translateX.value, {duration: durationAnimation})},
+    ],
+  }));
 
   useEffect(() => {
     Geolocation.getCurrentPosition(position => {
@@ -93,17 +125,63 @@ const App = () => {
       longitudeDelta: 0.0121,
     };
     setRegion(newRegion);
-    mapViewRef.current?.animateToRegion(newRegion, 1000);
+    mapViewRef.current?.animateToRegion(newRegion, 200);
   };
 
   const handleMarkerPress = (location: Location) => {
+    bottomSheetRef2.current?.close();
+    setDestination({
+      latitude: null,
+      longitude: null,
+    });
     setSelectedLocation(location);
-    bottomSheetRef.current.expand();
+    // setDestination({
+    //   latitude: location.latitude,
+    //   longitude: location.longitude,
+    // });
+    bottomSheetRef.current?.expand();
+  };
+
+  const handleGetDirection = () => {
+    bottomSheetRef.current?.close();
+    setDestination({
+      latitude: selectedLocation.latitude,
+      longitude: selectedLocation.longitude,
+    });
+
+    mapViewRef.current?.animateToRegion(
+      {
+        latitude: (region.latitude + selectedLocation.latitude) / 2,
+        longitude: (region.longitude + selectedLocation.longitude) / 2,
+        latitudeDelta:
+          Math.abs(region.latitude - selectedLocation.latitude) * 2,
+        longitudeDelta:
+          Math.abs(region.longitude - selectedLocation.longitude) * 2,
+      },
+      1000,
+    );
+
+    const distance = getDistance(
+      {
+        latitude: region.latitude,
+        longitude: region.longitude,
+      },
+      {
+        latitude: selectedLocation.latitude,
+        longitude: selectedLocation.longitude,
+      },
+    );
+    const duration = distance / 1000;
+    setDurationToDestination(duration);
+    bottomSheetRef2.current?.expand();
   };
 
   const handleCloseBottomSheet = () => {
-    bottomSheetRef.current.collapse();
+    bottomSheetRef.current?.close();
     setSelectedLocation(null);
+  };
+  const handleCloseBottomSheet2 = () => {
+    bottomSheetRef2.current?.close();
   };
 
   const handleChangeMapType = (mapType: string) => {
@@ -116,6 +194,12 @@ const App = () => {
     {title: 'Vị trí đổ rác thải', icon: 'map-marker'},
     {title: 'Vị trí tái chế rác', icon: 'map-marker'},
   ];
+
+  const changeMinutesToHoursAndMinutes = (minutes: number) => {
+    const hours = Math.floor(minutes / 60);
+    const remainMinutes = minutes % 60;
+    return `${hours} giờ ${remainMinutes} phút`;
+  };
 
   const renderCarouselItem = (item: ListRenderItemInfo<CarouselItems>) => {
     return (
@@ -142,6 +226,19 @@ const App = () => {
         showsUserLocation
         showsMyLocationButton={false}
         region={region}>
+        {destination.latitude && destination.longitude ? (
+          <MapViewDirections
+            origin={{
+              latitude: region.latitude,
+              longitude: region.longitude,
+            }}
+            destination={destination}
+            apikey="AIzaSyDSg64UIA8bLIMCVfGc4vB5n_lrQRZHtYQ"
+            strokeWidth={4}
+            strokeColor="rgb(0,139,241)"
+            mode="DRIVING"
+          />
+        ) : null}
         {locations.map((location, index) =>
           location.latitude && location.longitude ? (
             <Marker
@@ -213,7 +310,12 @@ const App = () => {
         enablePanDownToClose>
         {selectedLocation && (
           <View style={styles.bottomSheetContent}>
-            <Text style={{fontSize: 20, fontWeight: 'bold'}}>
+            <TouchableOpacity
+              // style={styles.locationButton}
+              onPress={handleGetDirection}>
+              <Text>Tìm đường đi đến đây</Text>
+            </TouchableOpacity>
+            <Text style={styles.title}>
               Address: {selectedLocation.address}
             </Text>
             <TouchableOpacity
@@ -224,44 +326,85 @@ const App = () => {
 
             <View style={styles.tabContainer}>
               <TouchableOpacity
-                style={[
-                  styles.tabButton,
-                  activeTab === 'description' && styles.activeTab,
-                ]}
-                onPress={() => setActiveTab('description')}>
-                <Text style={styles.tabText}>Description</Text>
+                activeOpacity={1}
+                style={[styles.tabButton]}
+                onPress={() => {
+                  setActiveTab('description');
+                  translateX.value = 0;
+                }}>
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === 'description' && {color: 'blue'},
+                  ]}>
+                  Description
+                </Text>
               </TouchableOpacity>
+
               <TouchableOpacity
-                style={[
-                  styles.tabButton,
-                  activeTab === 'image' && styles.activeTab,
-                ]}
-                onPress={() => setActiveTab('image')}>
-                <Text style={styles.tabText}>Image</Text>
+                activeOpacity={1}
+                style={styles.tabButton}
+                onPress={() => {
+                  setActiveTab('image');
+                  translateX.value = (WINDOW_WIDTH - 40) / 2;
+                }}>
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === 'image' && {color: 'blue'},
+                  ]}>
+                  Image
+                </Text>
               </TouchableOpacity>
             </View>
 
+            <Animated.View style={[styles.moving_box, animatedMoveStyle]} />
+
             <View style={styles.tabContent}>
               {activeTab === 'description' && (
-                <View style={{marginBottom: 10}}>
+                <Animated.View
+                  exiting={FadeOutLeft.duration(durationAnimation)}
+                  entering={FadeInLeft.duration(durationAnimation).delay(150)}
+                  style={{marginBottom: 10}}>
                   <ScrollView
                     contentContainerStyle={{backgroundColor: 'white'}}>
-                    <Text style={{paddingBottom: 100}}>
+                    <Text style={styles.description}>
                       {selectedLocation.description}
                     </Text>
                   </ScrollView>
-                </View>
+                </Animated.View>
               )}
               {activeTab === 'image' && (
-                <View style={{marginBottom: 10}}>
-                  <ScrollView
-                    style={styles.image_scroll_view}
-                    contentContainerStyle={{}}>
+                <Animated.View
+                  entering={FadeInRight.duration(durationAnimation).delay(150)}
+                  exiting={FadeOutRight.duration(durationAnimation)}
+                  style={{marginBottom: 10}}>
+                  <ScrollView style={styles.image_scroll_view}>
                     <ImageShow images={selectedLocation.image} />
                   </ScrollView>
-                </View>
+                </Animated.View>
               )}
             </View>
+          </View>
+        )}
+      </BottomSheet>
+      <BottomSheet
+        ref={bottomSheetRef2}
+        index={-1}
+        snapPoints={snapPoints2}
+        enablePanDownToClose>
+        {durationToDestination !== null && (
+          <View>
+            <Text style={styles.title}>
+              Khoảng cách: {durationToDestination}
+            </Text>
+            <Text style={styles.title}>Thời gian đi đến: phút</Text>
+            {/* Nút đóng BottomSheet */}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={handleCloseBottomSheet2}>
+              <Text>Close</Text>
+            </TouchableOpacity>
           </View>
         )}
       </BottomSheet>
@@ -320,7 +463,7 @@ const styles = StyleSheet.create({
   },
   closeButton: {
     position: 'absolute',
-    top: 10,
+    top: 0,
     right: 10,
   },
   tabContainer: {
@@ -331,22 +474,36 @@ const styles = StyleSheet.create({
   },
   tabButton: {
     paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingTop: 10,
     borderRadius: 5,
     width: '50%',
     alignItems: 'center',
   },
   tabContent: {},
-  activeTab: {
-    backgroundColor: 'white',
-    borderBottomWidth: 2,
-    borderBottomColor: '#000000',
-  },
   tabText: {
     fontWeight: 'bold',
+    fontSize: 14,
+    color: 'gray',
   },
   image_scroll_view: {
     marginBottom: 75,
+  },
+  moving_box: {
+    width: (WINDOW_WIDTH - 40) / 2,
+    height: 2,
+    borderRadius: 10,
+    backgroundColor: 'blue',
+    marginBottom: 10,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  description: {
+    paddingBottom: 100,
+    fontSize: 16,
+    color: 'black',
   },
 });
 

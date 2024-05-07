@@ -9,6 +9,8 @@ import ActivityScreen from '../screens/ActivityScreen';
 import AddLocationScreen from '../screens/AddLocationScreen';
 import {Alert} from 'react-native';
 import AddActivityScreen from '../screens/AddActivityScreen';
+import ImageDetailScreen from '../screens/other/ImageDetailScreen';
+import {ROLE} from '../types';
 
 const AppStack = createNativeStackNavigator();
 
@@ -19,43 +21,54 @@ const stack = [
     name: 'BottomTabs',
     component: BottomTabs,
     options: {headerShown: false},
-    allowRoles: [0, 1, 2, 3],
+    allowRoles: [ROLE.GUEST, ROLE.USER, ROLE.ADMIN, ROLE.VOLUNTEER],
   },
   {
     name: 'Login',
     component: LoginScreen,
     options: {headerShown: false},
-    allowRoles: [0],
+    allowRoles: [ROLE.GUEST],
   },
   {
     name: 'Register',
     component: RegisterScreen,
     options: {headerShown: false},
-    allowRoles: [0],
+    allowRoles: [ROLE.GUEST],
   },
   {
     name: 'EditProfile',
     component: EditProfileScreen,
     options: {headerShown: true},
-    allowRoles: [1, 2, 3],
+    allowRoles: [ROLE.USER, ROLE.ADMIN, ROLE.VOLUNTEER],
   },
   {
     name: 'ActivityScreen',
     component: ActivityScreen,
     options: {headerShown: true},
-    allowRoles: [0, 1, 2, 3],
+    allowRoles: [ROLE.GUEST, ROLE.USER, ROLE.ADMIN, ROLE.VOLUNTEER],
   },
   {
     name: 'AddLocation',
     component: AddLocationScreen,
     options: {headerShown: true},
-    allowRoles: [1, 2, 3],
+    allowRoles: [ROLE.USER, ROLE.ADMIN, ROLE.VOLUNTEER],
   },
   {
     name: 'AddActivityScreen',
     component: AddActivityScreen,
     options: {headerShown: true},
-    allowRoles: [1, 2, 3],
+    allowRoles: [ROLE.USER, ROLE.ADMIN, ROLE.VOLUNTEER],
+  },
+  {
+    name: 'ImageDetailScreen',
+    component: ImageDetailScreen,
+    options: {
+      headerShown: true,
+      headerTransparent: true,
+      title: '',
+      headerTintColor: 'white',
+    },
+    allowRoles: [ROLE.GUEST, ROLE.USER, ROLE.ADMIN, ROLE.VOLUNTEER],
   },
 ];
 const navigationCustom = (role: number, navigation: any, page: string) => {
@@ -89,13 +102,13 @@ const navigationCustom = (role: number, navigation: any, page: string) => {
 
 const AppNavigation = () => {
   const {user} = React.useContext(UserContext);
-  const [role, setRole] = useState(0);
+  const [role, setRole] = useState(ROLE.GUEST);
 
   useEffect(() => {
     if ((user as {role?: number})?.role !== undefined) {
       setRole((user as {role: number}).role);
     } else {
-      setRole(0);
+      setRole(ROLE.GUEST);
     }
   }, [user]);
 
