@@ -10,6 +10,7 @@ import UserContext from './context/UserContext';
 import firestore from '@react-native-firebase/firestore';
 import {PaperProvider} from 'react-native-paper';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
+import BackgroundFetch from 'react-native-background-fetch'; // Import thư viện BackgroundFetch
 
 function App(): JSX.Element {
   const [user, setUser] = useState<any>({});
@@ -41,7 +42,37 @@ function App(): JSX.Element {
     };
 
     fetchData();
+
+    // Đăng ký BackgroundFetch
+    BackgroundFetch.configure(
+      {
+        minimumFetchInterval: 15, // Thời gian tối thiểu giữa mỗi lần chạy (phút)
+        enableHeadless: true, // Cho phép chạy khi ứng dụng không chạy
+        startOnBoot: true, // Bắt đầu chạy khi thiết bị khởi động
+      },
+      async () => {
+        console.log('[BackgroundFetch] Task completed');
+
+        // Kiểm tra hoạt động mới và hiển thị thông báo
+        await checkForNewActivitiesAndNotify();
+
+        // Kết thúc nhiệm vụ
+        BackgroundFetch.finish();
+      },
+      error => {
+        console.error('[BackgroundFetch] Error', error);
+      },
+    );
+
+    // Bắt đầu chạy BackgroundFetch
+    BackgroundFetch.start();
   }, []);
+
+  // Hàm kiểm tra hoạt động mới và hiển thị thông báo
+  const checkForNewActivitiesAndNotify = async () => {
+    // Logic kiểm tra hoạt động mới ở đây
+    // Nếu có hoạt động mới, hiển thị thông báo
+  };
 
   const theme = {
     dark: false,

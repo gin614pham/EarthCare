@@ -69,6 +69,8 @@ const App = () => {
     number | null
   >(null);
 
+  const [distanceToDestination, setDistanceToDestination] =
+    useState<string>('');
   const translateX = useSharedValue<number>(0);
   const durationAnimation = 300;
 
@@ -161,18 +163,19 @@ const App = () => {
       1000,
     );
 
-    const distance = getDistance(
-      {
-        latitude: region.latitude,
-        longitude: region.longitude,
-      },
-      {
-        latitude: selectedLocation.latitude,
-        longitude: selectedLocation.longitude,
-      },
-    );
-    const duration = distance / 1000;
-    setDurationToDestination(duration);
+    // const distance = getDistance(
+    //   {
+    //     latitude: region.latitude,
+    //     longitude: region.longitude,
+    //   },
+    //   {
+    //     latitude: selectedLocation.latitude,
+    //     longitude: selectedLocation.longitude,
+    //   },
+    // );
+    // const duration = distance / 1000;
+    // setDurationToDestination(duration);
+
     bottomSheetRef2.current?.expand();
   };
 
@@ -237,6 +240,10 @@ const App = () => {
             strokeWidth={4}
             strokeColor="rgb(0,139,241)"
             mode="DRIVING"
+            onReady={result => {
+              setDurationToDestination(result.duration);
+              setDistanceToDestination(result.distance);
+            }}
           />
         ) : null}
         {locations.map((location, index) =>
@@ -396,9 +403,11 @@ const App = () => {
         {durationToDestination !== null && (
           <View>
             <Text style={styles.title}>
-              Khoảng cách: {durationToDestination}
+              Khoảng cách: {distanceToDestination}
             </Text>
-            <Text style={styles.title}>Thời gian đi đến: phút</Text>
+            <Text style={styles.title}>
+              Thời gian đi đến: {durationToDestination}
+            </Text>
             {/* Nút đóng BottomSheet */}
             <TouchableOpacity
               style={styles.closeButton}
