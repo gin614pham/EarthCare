@@ -1,91 +1,109 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useCallback, useRef} from 'react';
 import {
   View,
   TextInput,
   Text,
   FlatList,
   StyleSheet,
-  TouchableWithoutFeedback,
-  Keyboard,
   TouchableOpacity,
+  Keyboard,
+  Alert,
 } from 'react-native';
 import {getPlaceDetail, getSearchResults} from '../api/googleMapAPI';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 const Search = ({handleGetLocation}) => {
   const [search, setSearch] = useState('');
   const [predictions, setPredictions] = useState([]);
-  const [visible, setVisible] = useState(false);
+  const animatedHeight = useSharedValue(0);
+  const flatListRef = useRef(null);
+
+  const containerRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
-    setVisible(true);
-    const fetchPredictions = async () => {
-      if (search) {
-        const results = await getSearchResults(search);
-        setPredictions(results);
-      } else {
-        setPredictions([]);
-      }
+    const handleOutsidePress = event => {
+      setPredictions([]);
+      animatedHeight.value = withTiming(0, {duration: 300});
+      inputRef.current.blur();
     };
+    Keyboard.addListener('keyboardDidHide', handleOutsidePress);
+  }, []);
+
+  useEffect(() => {
     fetchPredictions();
   }, [search]);
 
-  const handleSelectPrediction = async (prediction: {
-    placePrediction: {placeId: any};
-  }) => {
+  const fetchPredictions = useCallback(async () => {
+    if (search) {
+      const results = await getSearchResults(search);
+      setPredictions(results);
+      animatedHeight.value = withTiming(results.length * 50 + 0, {
+        duration: 300,
+      });
+    } else {
+      setPredictions([]);
+      animatedHeight.value = withTiming(0, {duration: 300});
+    }
+  }, [search]);
+
+  const handleSelectPrediction = async prediction => {
     const placeId = prediction.placePrediction.placeId;
     try {
       const response = await getPlaceDetail(placeId);
-      console.log(response.location);
       handleGetLocation(response.location);
-      setVisible(false);
+      Keyboard.dismiss();
     } catch (error) {
-      console.log(error);
+      Alert.alert('Error', 'Failed to get place details');
     }
   };
 
   const renderPrediction = ({item}) => (
-    // <Text style={styles.predictionText}>{item.placePrediction.text.text}</Text>
     <TouchableOpacity
       onPress={() => handleSelectPrediction(item)}
-      style={{
-        flex: 1,
-      }}>
+      style={styles.predictionContainer}>
+      <Ionicons name="location-outline" size={20} color="grey" />
       <Text style={styles.predictionText}>
         {item.placePrediction.text.text}
       </Text>
     </TouchableOpacity>
   );
 
-  const renderSeparator = () => <View style={styles.separator} />;
+  const animatedStyles = useAnimatedStyle(() => ({
+    height: animatedHeight.value,
+  }));
 
   return (
-    <View style={styles.container}>
-      <View>
+    <View ref={containerRef} style={styles.container}>
+      <View style={styles.inputContainer}>
+        <Ionicons
+          name="search"
+          size={24}
+          color="grey"
+          style={styles.searchIcon}
+        />
         <TextInput
           placeholder="Search for a location"
           value={search}
-          onChangeText={text => setSearch(text)}
+          onChangeText={setSearch}
+          ref={inputRef}
           style={styles.input}
         />
-        {predictions?.length !== 0 && visible && (
-          <FlatList
-            data={predictions}
-            renderItem={renderPrediction}
-            keyExtractor={item => item.placePrediction.placeId}
-            ItemSeparatorComponent={renderSeparator}
-            style={styles.flatList}
-          />
-        )}
       </View>
-      {predictions?.length !== 0 && visible && (
-        <TouchableWithoutFeedback
-          onPress={() => {
-            setVisible(false);
-            Keyboard.dismiss();
-          }}>
-          <View style={{height: 1000}} />
-        </TouchableWithoutFeedback>
-      )}
+      <Animated.View style={[styles.predictionsContainer, animatedStyles]}>
+        <FlatList
+          ref={flatListRef}
+          data={predictions}
+          renderItem={renderPrediction}
+          keyExtractor={item => item.placePrediction.placeId}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+        />
+      </Animated.View>
     </View>
   );
 };
@@ -97,28 +115,43 @@ const styles = StyleSheet.create({
     left: 10,
     right: 10,
     zIndex: 100,
-    display: 'flex',
-    flexDirection: 'column',
   },
-  input: {
-    backgroundColor: 'white',
-    padding: 10,
-    borderRadius: 20,
-  },
-  flatList: {
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     backgroundColor: 'white',
     borderRadius: 25,
-    paddingTop: 10,
+    paddingHorizontal: 10,
+    elevation: 2,
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: 10,
+  },
+  predictionsContainer: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    marginTop: 10,
+    elevation: 2,
+    overflow: 'hidden',
+  },
+  predictionContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 15,
+    paddingVertical: 10,
   },
   predictionText: {
     fontSize: 16,
-    color: 'black',
-    padding: 10,
+    marginLeft: 10,
   },
   separator: {
     height: 1,
-
-    padding: 5,
+    backgroundColor: '#e0e0e0',
   },
 });
 

@@ -10,16 +10,8 @@ const BottomSheetComponent = ({navigation}) => {
   const bottomSheetRef = useRef(null);
   const snapPoints = useMemo(() => ['70%'], []);
 
-  const handleSheetChanges = useCallback(index => {
-    console.log('handleSheetChanges', index);
-  }, []);
-
   return (
-    <BottomSheet
-      ref={bottomSheetRef}
-      index={0}
-      snapPoints={snapPoints}
-      onChange={handleSheetChanges}>
+    <BottomSheet ref={bottomSheetRef} index={0} snapPoints={snapPoints}>
       <Tab.Navigator
         initialRouteName="Description"
         screenOptions={{

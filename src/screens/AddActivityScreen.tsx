@@ -10,6 +10,7 @@ import {
   Keyboard,
   ToastAndroid,
   Modal,
+  Alert,
 } from 'react-native';
 import {getCurrentLocation} from '../api/googleMapAPI';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -25,6 +26,7 @@ import firestore from '@react-native-firebase/firestore';
 import storage from '@react-native-firebase/storage';
 import MapGoogle from '../components/MapGoogle';
 import UserContext from '../context/UserContext';
+import LoadingContext from '../context/LoadingContext';
 
 const AddActivityScreen = ({navigation}: any) => {
   const [activityInfo, setActivityInfo] = useState<Activity>({
@@ -48,10 +50,7 @@ const AddActivityScreen = ({navigation}: any) => {
   const [showMapModal, setShowMapModal] = useState(false);
   const [isLocationFetched, setIsLocationFetched] = useState(false);
   const {user} = useContext(UserContext);
-
-  useEffect(() => {
-    console.log(activityInfo);
-  }, [activityInfo]);
+  const {loading, setIsLoading} = useContext(LoadingContext);
 
   const handlePressAddImage = async () => {
     const response: any = await launchImageLibrary({mediaType: 'photo'});
@@ -60,11 +59,7 @@ const AddActivityScreen = ({navigation}: any) => {
       const image = response.assets[0];
       const reference = storage().ref(`activities/${image.fileName}`);
       const task = reference.putFile(image.uri);
-      task.on('state_changed', taskSnapshot => {
-        console.log(
-          `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
-        );
-      });
+      task.on('state_changed', taskSnapshot => {});
       task.then(async () => {
         const url = await reference.getDownloadURL();
         setActivityInfo({
@@ -90,16 +85,18 @@ const AddActivityScreen = ({navigation}: any) => {
       navigation.goBack();
       ToastAndroid.show('Add activity success', ToastAndroid.SHORT);
     } catch (error) {
-      console.log(error);
+      Alert.alert('Error', 'Failed to add activity');
     }
   };
 
   const getCurrentPosition = async () => {
+    setIsLoading(true);
     const currentLocation = await getCurrentLocation(
       activityInfo.location.latitude,
       activityInfo.location.longitude,
     );
     setActivityInfo({...activityInfo, address: currentLocation});
+    setIsLoading(false);
   };
 
   const formatDate = (date: string) => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {View, StyleSheet, TouchableOpacity, Alert} from 'react-native';
+import {View, StyleSheet, TouchableOpacity, Alert, Image} from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import Icon2 from 'react-native-vector-icons/Feather';
 import HomeScreen from '../screens/HomeScreen';
@@ -10,6 +10,12 @@ import ActivitiesListScreen from '../screens/ActivitiesListScreen';
 import LinearGradient from 'react-native-linear-gradient';
 import {navigationCustom} from './AppNavigation';
 import UserContext from '../context/UserContext';
+import LottieView from 'lottie-react-native';
+import Animated, {
+  useSharedValue,
+  withSpring,
+  useAnimatedStyle,
+} from 'react-native-reanimated';
 
 const Tab = createBottomTabNavigator();
 
@@ -30,12 +36,25 @@ const BottomTabs = ({navigation}: any) => {
   const directionPage = (page: string) => {
     navigationCustom(user?.role, navigation, page);
   };
+
+  const scale = useSharedValue(0);
+
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{scale: scale.value}],
+    };
+  });
+
+  React.useEffect(() => {
+    scale.value = withSpring(1);
+  }, []);
+
   return (
     <Tab.Navigator
       screenOptions={{
         tabBarActiveTintColor: '#35B6FF',
         tabBarShowLabel: true,
-        tabBarLabelStyle: {fontSize: 12, fontWeight: 'bold', marginBottom: 5},
+        tabBarLabelStyle: {fontSize: 12, marginBottom: 5, fontWeight: '500'},
         tabBarHideOnKeyboard: true,
         headerShown: false,
         tabBarStyle: {
@@ -44,7 +63,7 @@ const BottomTabs = ({navigation}: any) => {
           // left: 20,
           // right: 20,
           backgroundColor: '#ffffff',
-          borderRadius: 10,
+
           height: 70,
           // làm cho center button không bị che mất
           paddingVertical: 10,
@@ -56,7 +75,18 @@ const BottomTabs = ({navigation}: any) => {
         component={HomeScreen}
         options={{
           tabBarIcon: ({color, size}) => (
-            <Icon2 name="map" color={color} size={35} />
+            // <Icon2 name="map" color={color} size={35} />
+            // <Image
+            //   source={require('../assets/images/bottombar/map.png')}
+            //   style={{width: 35, height: 35}}
+            // />
+
+            <Animated.View style={animatedStyle}>
+              <Image
+                source={require('../assets/images/bottombar/map.png')}
+                style={{width: 35, height: 35}}
+              />
+            </Animated.View>
           ),
         }}
       />
@@ -65,7 +95,17 @@ const BottomTabs = ({navigation}: any) => {
         component={NotificationScreen}
         options={{
           tabBarIcon: ({color, size}) => (
-            <Icon name="bells" color={color} size={35} />
+            // <Icon name="bells" color={color} size={35} />
+            // <Image
+            //   source={require('../assets/images/bottombar/notification.png')}
+            //   style={{width: 35, height: 35}}
+            // />
+            <Animated.View style={animatedStyle}>
+              <Image
+                source={require('../assets/images/bottombar/notification.png')}
+                style={{width: 35, height: 35}}
+              />
+            </Animated.View>
           ),
         }}
       />
@@ -80,18 +120,24 @@ const BottomTabs = ({navigation}: any) => {
             />
           ),
           tabBarIcon: ({focused, color, size}) => (
-            <LinearGradient
-              colors={['#B4E0F9', '#35B6FF']}
-              style={styles.centerButton}>
-              <View>
-                <Icon
+            // <LinearGradient
+            //   colors={['#B4E0F9', '#35B6FF']}
+            //   style={styles.centerButton}>
+
+            <View style={styles.centerButton}>
+              {/* <Icon
                   name="plus"
                   color="#fff"
                   size={35}
                   style={{fontWeight: 'bold'}}
-                />
-              </View>
-            </LinearGradient>
+                /> */}
+              <LottieView
+                source={require('../assets/animations/add.json')}
+                autoPlay
+                loop
+                style={{width: 110, height: 110}}
+              />
+            </View>
           ),
           tabBarLabel: () => null,
         }}
@@ -101,7 +147,17 @@ const BottomTabs = ({navigation}: any) => {
         component={ActivitiesListScreen}
         options={{
           tabBarIcon: ({color, size}) => (
-            <Icon name="hearto" color={color} size={35} />
+            // <Icon name="hearto" color={color} size={35} />
+            // <Image
+            //   source={require('../assets/images/bottombar/volunteer.png')}
+            //   style={{width: 35, height: 35}}
+            // />
+            <Animated.View style={animatedStyle}>
+              <Image
+                source={require('../assets/images/bottombar/volunteer.png')}
+                style={{width: 35, height: 35}}
+              />
+            </Animated.View>
           ),
         }}
       />
@@ -110,7 +166,17 @@ const BottomTabs = ({navigation}: any) => {
         component={ProfileScreen}
         options={{
           tabBarIcon: ({color, size}) => (
-            <Icon name="user" color={color} size={35} />
+            // <Icon name="user" color={color} size={35} />
+            // <Image
+            //   source={require('../assets/images/bottombar/profile.png')}
+            //   style={{width: 35, height: 35}}
+            // />
+            <Animated.View style={animatedStyle}>
+              <Image
+                source={require('../assets/images/bottombar/profile.png')}
+                style={{width: 35, height: 35}}
+              />
+            </Animated.View>
           ),
         }}
       />
@@ -123,13 +189,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    top: -10,
+    top: -20,
   },
   centerButton: {
-    backgroundColor: 'blue',
-    width: 55,
-    height: 55,
-    borderRadius: 35,
+    backgroundColor: 'white',
+    width: 90,
+    height: 90,
+    borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
   },

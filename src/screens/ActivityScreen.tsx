@@ -7,9 +7,11 @@ const ActivityScreen = ({route}: any) => {
   const {activity} = route.params;
   const {user} = useContext(UserContext);
   const [interested, setInterested] = useState<boolean>(false);
+  const [activityEnded, setActivityEnded] = useState<boolean>(false);
 
   useEffect(() => {
     checkInterest();
+    checkActivityEnded();
   }, []);
 
   const checkInterest = async () => {
@@ -21,6 +23,14 @@ const ActivityScreen = ({route}: any) => {
 
     if (!interestedRef.empty) {
       setInterested(true);
+    }
+  };
+
+  const checkActivityEnded = () => {
+    const currentDate = new Date();
+    const activityEndDate = new Date(activity.endDateTime);
+    if (currentDate > activityEndDate) {
+      setActivityEnded(true);
     }
   };
 
@@ -61,13 +71,18 @@ const ActivityScreen = ({route}: any) => {
       <Text style={styles.address}>{activity.address}</Text>
       <Text style={styles.descriptionTitle}>Mô tả</Text>
       <Text style={styles.description}>{activity.description}</Text>
-      <TouchableOpacity
-        style={styles.interestedButton}
-        onPress={handleInterestToggle}>
-        <Text style={styles.interestedText}>
-          {interested ? 'Hủy quan tâm' : 'Quan tâm'}
-        </Text>
-      </TouchableOpacity>
+      {!activityEnded ? (
+        <TouchableOpacity
+          style={styles.interestedButton}
+          onPress={handleInterestToggle}
+          disabled={activityEnded}>
+          <Text style={styles.interestedText}>
+            {interested ? 'Hủy quan tâm' : 'Quan tâm'}
+          </Text>
+        </TouchableOpacity>
+      ) : (
+        <Text style={styles.activityEndedText}>Đã kết thúc</Text>
+      )}
     </View>
   );
 };
@@ -129,5 +144,12 @@ const styles = StyleSheet.create({
   interestedText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  activityEndedText: {
+    marginTop: 20,
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'red',
+    alignSelf: 'center',
   },
 });

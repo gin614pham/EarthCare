@@ -19,6 +19,7 @@ import firestore from '@react-native-firebase/firestore';
 import BottomSheet, {WINDOW_WIDTH} from '@gorhom/bottom-sheet';
 import {FlatList, ScrollView} from 'react-native-gesture-handler';
 import {Chip} from 'react-native-paper';
+import Icon from 'react-native-vector-icons/AntDesign';
 import {
   CarouselItems,
   LOCATION_TYPES,
@@ -59,7 +60,7 @@ const App = () => {
   );
   const [activeTab, setActiveTab] = useState('description');
   const [visible, setVisible] = useState(false);
-  const snapPoints = useMemo(() => ['70%'], []);
+  const snapPoints = useMemo(() => ['65%'], []);
   const snapPoints2 = useMemo(() => ['30%'], []);
   const [mapType, setMapType] = useState('standard');
   const bottomSheetRef = useRef<BottomSheet>(null);
@@ -71,6 +72,10 @@ const App = () => {
   const [durationToDestination, setDurationToDestination] = useState<
     number | null
   >(null);
+
+  // thêm tích cho Chip
+  const [selectedChip, setSelectedChip] = useState([]);
+  const [activivities, setActivities] = useState([]);
 
   const [distanceToDestination, setDistanceToDestination] =
     useState<string>('');
@@ -106,6 +111,20 @@ const App = () => {
           ...doc.data(),
         }));
         setLocations(locations as any);
+      });
+
+    return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = firestore()
+      .collection('activities')
+      .onSnapshot(snapshot => {
+        const activities = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setActivities(activities as any);
       });
 
     return () => unsubscribe();
@@ -195,9 +214,18 @@ const App = () => {
   };
 
   const carouselItems = [
-    {title: 'Vị trí bị ô nhiễm', icon: require('../assets/icons/danger.png')},
-    {title: 'Vị trí đổ rác thải', icon: require('../assets/icons/trash1.png')},
     {
+      id: 1,
+      title: 'Vị trí bị ô nhiễm',
+      icon: require('../assets/icons/danger.png'),
+    },
+    {
+      id: 2,
+      title: 'Vị trí đổ rác thải',
+      icon: require('../assets/icons/trash1.png'),
+    },
+    {
+      id: 3,
       title: 'Vị trí tái chế rác',
       icon: require('../assets/icons/recycling-center.png'),
     },
@@ -215,6 +243,7 @@ const App = () => {
         entering={SlideInRight.duration(durationAnimation.DURATION_500).delay(
           item.index * 250 + 500,
         )}>
+        {/* Thêm tích cho Chip và có thể chọn nhiều Chip và xóa Chip đã chọn */}
         <Chip
           icon={({size}) => (
             <Image
@@ -227,8 +256,29 @@ const App = () => {
             borderRadius: 20,
             padding: 3,
             marginRight: 5,
+          }}
+          onPress={() => {
+            if (selectedChip.includes(item.item.title)) {
+              setSelectedChip(selectedChip.filter(x => x !== item.item.title));
+            } else {
+              setSelectedChip([...selectedChip, item.item.title]);
+            }
           }}>
-          {item.item.title}
+          <Text>{item.item.title}</Text>
+          {selectedChip.includes(item.item.title) ? (
+            <Icon
+              name="check"
+              size={20}
+              style={{marginLeft: 5}}
+              onPress={() => {
+                setSelectedChip(
+                  selectedChip.filter(x => x !== item.item.title),
+                );
+              }}
+            />
+          ) : (
+            <View style={{width: 20, height: 20}}></View>
+          )}
         </Chip>
       </Animated.View>
     );
@@ -243,7 +293,44 @@ const App = () => {
         mapType={mapType}
         showsUserLocation
         showsMyLocationButton={false}
-        region={region}>
+        showsPointsOfInterest={false}
+        showsCompass={false}
+        customMapStyle={[
+          {
+            featureType: 'administrative',
+            elementType: 'geometry',
+            stylers: [
+              {
+                visibility: 'off',
+              },
+            ],
+          },
+          {
+            featureType: 'poi',
+            stylers: [
+              {
+                visibility: 'off',
+              },
+            ],
+          },
+          {
+            featureType: 'road',
+            elementType: 'labels.icon',
+            stylers: [
+              {
+                visibility: 'off',
+              },
+            ],
+          },
+          {
+            featureType: 'transit',
+            stylers: [
+              {
+                visibility: 'off',
+              },
+            ],
+          },
+        ]}>
         {destination.latitude && destination.longitude ? (
           <MapViewDirections
             origin={{
@@ -292,6 +379,7 @@ const App = () => {
           strokeColor="rgba(0, 0, 255, 0.5)"
           strokeWidth={2}
         />
+         */}
       </MapView>
 
       <TouchableOpacity
@@ -333,18 +421,32 @@ const App = () => {
         enablePanDownToClose>
         {selectedLocation && (
           <View style={styles.bottomSheetContent}>
-            <TouchableOpacity
-              // style={styles.locationButton}
-              onPress={handleGetDirection}>
-              <Text>Tìm đường đi đến đây</Text>
-            </TouchableOpacity>
-            <Text style={styles.title}>
-              Address: {selectedLocation.address}
+            <View style={{display: 'flex', flexDirection: 'row'}}>
+              <TouchableOpacity
+                style={styles.findDirectionButton}
+                onPress={handleGetDirection}>
+                <Icon name="right" size={20} />
+                <Text>Đường đi</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.findDirectionButton}>
+                <Icon name="message1" size={20} />
+                <Text>Nhắn tin</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.title}>Address:</Text>
+            <Text style={styles.addressBottomSheet}>
+              {selectedLocation.address}
             </Text>
             <TouchableOpacity
               style={styles.closeButton}
               onPress={handleCloseBottomSheet}>
-              <Text>Close</Text>
+              {/* <Icon name="close" size={30} /> */}
+              <LottieView
+                source={require('../assets/animations/close.json')}
+                autoPlay
+                loop={true}
+                style={{width: 60, height: 60}}
+              />
             </TouchableOpacity>
 
             <View style={styles.tabContainer}>
@@ -434,16 +536,45 @@ const App = () => {
             <TouchableOpacity
               style={styles.closeButton}
               onPress={handleCloseBottomSheet2}>
-              <Text>Close</Text>
+              {/* <Icon name="close" size={30} /> */}
+              <LottieView
+                source={require('../assets/animations/close.json')}
+                autoPlay
+                loop={false}
+                style={{width: 60, height: 60}}
+              />
             </TouchableOpacity>
           </View>
         )}
       </BottomSheet>
+      {/* <TouchableOpacity
+        style={{
+          position: 'absolute',
+          bottom: 135,
+          left: 20,
+          borderRadius: 20,
+          backgroundColor: 'white',
+          padding: 10,
+          display: 'flex',
+          flexDirection: 'row',
+          zIndex: 1,
+        }}
+        onPress={() => setVisible(!visible)}>
+        <Text
+          style={{
+            fontSize: 13,
+            fontWeight: '600',
+          }}>
+          Gần bạn có gì?
+        </Text>
+
+        <Icon name="down" size={20} />
+      </TouchableOpacity> */}
       <ChangeMapType
         mapType={mapType}
         handleChangeMapType={handleChangeMapType}
       />
-      <View style={{position: 'absolute', top: 60, right: 20}}></View>
+      {/* <View style={{position: 'absolute', top: 60, right: 20}}></View> */}
     </View>
   );
 };
@@ -491,6 +622,7 @@ const styles = StyleSheet.create({
   bottomSheetContent: {
     padding: 20,
     paddingBottom: 200,
+    zIndex: 1000,
   },
   closeButton: {
     position: 'absolute',
@@ -535,6 +667,24 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
     fontSize: 16,
     color: 'black',
+  },
+  findDirectionButton: {
+    backgroundColor: 'white',
+    padding: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    marginRight: 10,
+  },
+  addressBottomSheet: {
+    fontSize: 16,
+    color: 'black',
+    marginBottom: 10,
+    fontWeight: '400',
   },
 });
 

@@ -1,4 +1,4 @@
-import React, {useContext, useEffect, useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   Text,
   TextInput,
@@ -21,6 +21,7 @@ import {Location, durationAnimation} from '../types';
 import Geolocation from '@react-native-community/geolocation';
 import {getCurrentLocation} from '../api/googleMapAPI';
 import UserContext from '../context/UserContext';
+import LoadingContext from '../context/LoadingContext';
 import Animated, {
   FadeInDown,
   StretchInX,
@@ -36,7 +37,7 @@ const AddLocationScreen = ({navigation}: any) => {
     longitude: 0,
     latitude: 0,
   });
-  const [modalVisible, setModalVisible] = useState(false);
+
   const [locationAdd, setLocationAdd] = useState({
     latitude: 0,
     longitude: 0,
@@ -45,27 +46,40 @@ const AddLocationScreen = ({navigation}: any) => {
   });
   const [isImageLoading, setIsImageLoading] = useState(false);
   const {user} = useContext(UserContext);
+  const {loading, setIsLoading} = useContext(LoadingContext);
 
   const getCurrentPosition = async () => {
-    Geolocation.getCurrentPosition(position => {
+    setIsLoading(true);
+    try {
+      const location = await new Promise((resolve, reject) => {
+        Geolocation.getCurrentPosition(
+          position => resolve(position),
+          error => reject(error),
+          {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+        );
+      });
+
+      const {latitude, longitude} = location.coords;
+
       setLocationAdd({
-        latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
+        latitude: latitude,
+        longitude: longitude,
         latitudeDelta: 0.015,
         longitudeDelta: 0.0121,
       });
-      // get current location address from lat and long
-    });
-    const currentLocation = await getCurrentLocation(
-      locationAdd.latitude,
-      locationAdd.longitude,
-    );
-    handleChange('address', currentLocation);
-  };
+      const currentLocation = await getCurrentLocation(latitude, longitude);
 
-  useEffect(() => {
-    getCurrentPosition();
-  }, []);
+      setLocationInfo(prevState => ({
+        ...prevState,
+        address: currentLocation,
+      }));
+      setIsLoading(false);
+    } catch (error) {
+      console.log(error);
+      Alert.alert('Error', 'Failed to get current location');
+      setIsLoading(false);
+    }
+  };
 
   const handleAddLocation = async () => {
     Keyboard.dismiss();
