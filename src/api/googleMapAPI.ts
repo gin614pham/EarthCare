@@ -9,12 +9,14 @@ export const getCurrentLocation = async (
     if (Config.GOOGLE_MAPS_API_KEY === '') {
       throw new Error('Google Maps API key is not set');
     }
-    const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${Config.GOOGLE_MAPS_API_KEY}`;
+    const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&lang=vi&apiKey=ab197e6b8d6f4781b067992462e140eb`;
+    console.log(url);
     const response = await axios.get(url);
     if (response.data.status === 'ZERO_RESULTS') {
       throw new Error('No results found');
     }
-    return response.data.results[0].formatted_address;
+    console.log(response.data.features[0].properties.formatted);
+    return response.data.features[0].properties.formatted;
   } catch (error) {
     console.log(error);
   }

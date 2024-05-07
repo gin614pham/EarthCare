@@ -50,6 +50,7 @@ const LoginScreen = ({navigation}: any) => {
       navigation.navigate('Map');
 
       Alert.alert('Thành công', 'Đăng nhập thành công');
+      // lặp qua từng user và thêm ngày tạo , ngày update
     } catch (error) {
       Alert.alert('Lỗi', error.message.replace(/\[.*?\]/, '').trim());
     } finally {

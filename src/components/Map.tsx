@@ -23,6 +23,7 @@ import {CarouselItems, Location} from '../types';
 import Search from './Search';
 import ChangeMapType from './ChangeMapType';
 import ImageShow from './ImageShow';
+import LottieView from 'lottie-react-native';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -174,10 +175,16 @@ const App = () => {
       <TouchableOpacity
         style={styles.locationButton}
         onPress={handleGetCurrentLocation}>
-        <Image
+        {/* <Image
           source={require('../assets/icons/focus.png')}
           style={{width: 40, height: 40}}
           resizeMode="contain"
+        /> */}
+        <LottieView
+          source={require('../assets/animations/locate.json')}
+          autoPlay
+          loop
+          style={{width: 60, height: 60}}
         />
       </TouchableOpacity>
       <Search handleGetLocation={handleGetLocation} />
@@ -296,6 +303,16 @@ const styles = StyleSheet.create({
     height: 60,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 3,
+    borderColor: 'rgba(0, 0, 0, 0.3)',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   bottomSheetContent: {
     padding: 20,

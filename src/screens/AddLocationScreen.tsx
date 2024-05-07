@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useContext, useEffect, useState} from 'react';
 import {
   Text,
   TextInput,
@@ -20,6 +20,7 @@ import {Picker} from '@react-native-picker/picker';
 import {Location} from '../types';
 import Geolocation from '@react-native-community/geolocation';
 import {getCurrentLocation} from '../api/googleMapAPI';
+import UserContext from '../context/UserContext';
 
 const AddLocationScreen = ({navigation}: any) => {
   const [locationInfo, setLocationInfo] = useState<Location>({
@@ -38,6 +39,7 @@ const AddLocationScreen = ({navigation}: any) => {
     longitudeDelta: 0.0121,
   });
   const [isImageLoading, setIsImageLoading] = useState(false);
+  const {user} = useContext(UserContext);
 
   const getCurrentPosition = async () => {
     Geolocation.getCurrentPosition(position => {
@@ -47,6 +49,7 @@ const AddLocationScreen = ({navigation}: any) => {
         latitudeDelta: 0.015,
         longitudeDelta: 0.0121,
       });
+      // get current location address from lat and long
     });
     const currentLocation = await getCurrentLocation(
       locationAdd.latitude,
@@ -64,11 +67,13 @@ const AddLocationScreen = ({navigation}: any) => {
     try {
       locationInfo.latitude = locationAdd.latitude;
       locationInfo.longitude = locationAdd.longitude;
-      await firestore()
-        .collection('locations')
-        .add({
-          ...locationInfo,
-        });
+      const docRef = await firestore().collection('locations').doc(); // Tạo một ID mới
+      await docRef.set({
+        ...locationInfo,
+        userId: user.uid,
+        createdAt: firestore.FieldValue.serverTimestamp(),
+        updatedAt: firestore.FieldValue.serverTimestamp(),
+      });
 
       Alert.alert('Success', 'Location added successfully');
       navigation.navigate('BottomTabs');

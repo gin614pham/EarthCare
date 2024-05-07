@@ -1,3 +1,4 @@
+import LottieView from 'lottie-react-native';
 import React, {useState} from 'react';
 import {
   View,
@@ -39,7 +40,12 @@ const ChangeMapType = ({mapType, handleChangeMapType}) => {
     <View style={styles.container}>
       <TouchableOpacity onPress={() => setVisible(true)}>
         <View style={styles.button}>
-          <Icon name="map" size={20} color="black" />
+          <LottieView
+            source={require('../assets/animations/typeMap.json')}
+            autoPlay
+            loop
+            style={{width: 50, height: 50}}
+          />
         </View>
       </TouchableOpacity>
 
@@ -93,15 +99,19 @@ const ChangeMapType = ({mapType, handleChangeMapType}) => {
 const styles = StyleSheet.create({
   container: {
     position: 'absolute',
-    top: 200,
-    right: 30,
+    top: 180,
+    right: 20,
   },
   button: {
     backgroundColor: 'white',
-    padding: 10,
     borderRadius: 50,
-    borderWidth: 1,
-    borderColor: 'black',
+    borderWidth: 3,
+    borderColor: 'rgba(0,0,0,0.3)',
+    shadowColor: 'black',
+    shadowOffset: {width: 0, height: 2},
+    shadowOpacity: 0.3,
+    shadowRadius: 2,
+    elevation: 3,
   },
   modalContainer: {
     flex: 1,
