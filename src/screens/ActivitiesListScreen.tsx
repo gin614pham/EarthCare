@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {Text, View, TouchableOpacity, Image, StyleSheet} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import LoadingContext from '../context/LoadingContext';
@@ -9,13 +9,6 @@ import Animated, {FadeInDown} from 'react-native-reanimated';
 import firestore from '@react-native-firebase/firestore';
 import {Activity} from '../types';
 import {useFocusEffect} from '@react-navigation/native';
-
-interface item {
-  id: string;
-  name: string;
-  description: string;
-  image: string;
-}
 
 const ActivitiesListScreen = ({navigation}: any) => {
   const {setIsLoading} = React.useContext(LoadingContext);
@@ -66,9 +59,6 @@ const ActivitiesListScreen = ({navigation}: any) => {
     setActivities(activities2);
   };
 
-  // useEffect(() => {
-  //   loadActivities();
-  // }, []);
   useFocusEffect(
     React.useCallback(() => {
       setIsLoading(true);
@@ -115,7 +105,7 @@ const ActivitiesListScreen = ({navigation}: any) => {
         <Animated.View entering={FadeInDown.duration(1000).delay(500)}>
           <TouchableOpacity
             style={{
-              backgroundColor: 'blue',
+              backgroundColor: '#35B6FF',
               padding: 10,
               alignItems: 'center',
               borderRadius: 10,
@@ -131,7 +121,7 @@ const ActivitiesListScreen = ({navigation}: any) => {
                 fontSize: 20,
                 fontWeight: 'bold',
               }}>
-              Đăng ký hoạt động
+              Register an activity
             </Text>
           </TouchableOpacity>
         </Animated.View>

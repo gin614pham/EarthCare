@@ -5,22 +5,26 @@ import {
   Text,
   TouchableOpacity,
   Dimensions,
-  Image,
   ListRenderItemInfo,
+  Image,
 } from 'react-native';
 import MapView, {
   Callout,
   Circle,
   Marker,
   PROVIDER_GOOGLE,
-  Polygon,
 } from 'react-native-maps';
 import Geolocation from '@react-native-community/geolocation';
 import firestore from '@react-native-firebase/firestore';
 import BottomSheet, {WINDOW_WIDTH} from '@gorhom/bottom-sheet';
 import {FlatList, ScrollView} from 'react-native-gesture-handler';
 import {Chip} from 'react-native-paper';
-import {CarouselItems, Location} from '../types';
+import {
+  CarouselItems,
+  LOCATION_TYPES,
+  Location,
+  durationAnimation,
+} from '../types';
 import Search from './Search';
 import ChangeMapType from './ChangeMapType';
 import ImageShow from './ImageShow';
@@ -29,13 +33,12 @@ import Animated, {
   FadeInRight,
   FadeOutLeft,
   FadeOutRight,
-  ZoomIn,
+  SlideInRight,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
 import LottieView from 'lottie-react-native';
-import Config from 'react-native-config';
 import MapViewDirections from 'react-native-maps-directions';
 import {getDistance} from 'geolib';
 
@@ -72,11 +75,14 @@ const App = () => {
   const [distanceToDestination, setDistanceToDestination] =
     useState<string>('');
   const translateX = useSharedValue<number>(0);
-  const durationAnimation = 300;
 
   const animatedMoveStyle = useAnimatedStyle(() => ({
     transform: [
-      {translateX: withTiming(translateX.value, {duration: durationAnimation})},
+      {
+        translateX: withTiming(translateX.value, {
+          duration: durationAnimation.DURATION_300,
+        }),
+      },
     ],
   }));
 
@@ -137,10 +143,6 @@ const App = () => {
       longitude: null,
     });
     setSelectedLocation(location);
-    // setDestination({
-    //   latitude: location.latitude,
-    //   longitude: location.longitude,
-    // });
     bottomSheetRef.current?.expand();
   };
 
@@ -193,9 +195,12 @@ const App = () => {
   };
 
   const carouselItems = [
-    {title: 'Vị trí bị ô nhiễm', icon: 'map-marker'},
-    {title: 'Vị trí đổ rác thải', icon: 'map-marker'},
-    {title: 'Vị trí tái chế rác', icon: 'map-marker'},
+    {title: 'Vị trí bị ô nhiễm', icon: require('../assets/icons/danger.png')},
+    {title: 'Vị trí đổ rác thải', icon: require('../assets/icons/trash1.png')},
+    {
+      title: 'Vị trí tái chế rác',
+      icon: require('../assets/icons/recycling-center.png'),
+    },
   ];
 
   const changeMinutesToHoursAndMinutes = (minutes: number) => {
@@ -206,16 +211,26 @@ const App = () => {
 
   const renderCarouselItem = (item: ListRenderItemInfo<CarouselItems>) => {
     return (
-      <Chip
-        icon={item.item.icon}
-        style={{
-          backgroundColor: 'white',
-          borderRadius: 20,
-          padding: 3,
-          marginRight: 5,
-        }}>
-        {item.item.title}
-      </Chip>
+      <Animated.View
+        entering={SlideInRight.duration(durationAnimation.DURATION_500).delay(
+          item.index * 250 + 500,
+        )}>
+        <Chip
+          icon={({size}) => (
+            <Image
+              source={item.item.icon}
+              style={{width: size, height: size}}
+            />
+          )}
+          style={{
+            backgroundColor: 'white',
+            borderRadius: 20,
+            padding: 3,
+            marginRight: 5,
+          }}>
+          {item.item.title}
+        </Chip>
+      </Animated.View>
     );
   };
 
@@ -256,10 +271,13 @@ const App = () => {
               }}
               title={location.address}
               description={location.description}
-              icon={require('../assets/icons/trash1.png')}
+              icon={
+                LOCATION_TYPES.find(x => x.value === location.locationType)
+                  ?.image
+              }
               onPress={() => handleMarkerPress(location)}>
-              <Callout tooltip>
-                <Text>hi</Text>
+              <Callout>
+                <Text>{location.locationType}</Text>
               </Callout>
             </Marker>
           ) : null,
@@ -279,11 +297,6 @@ const App = () => {
       <TouchableOpacity
         style={styles.locationButton}
         onPress={handleGetCurrentLocation}>
-        {/* <Image
-          source={require('../assets/icons/focus.png')}
-          style={{width: 40, height: 40}}
-          resizeMode="contain"
-        /> */}
         <LottieView
           source={require('../assets/animations/locate.json')}
           autoPlay
@@ -296,10 +309,13 @@ const App = () => {
         style={{
           position: 'absolute',
           top: 100,
-          left: 20,
+          left: 10,
+          right: 10,
           display: 'flex',
           flexDirection: 'row',
           gap: 10,
+          borderRadius: 20,
+          overflow: 'hidden',
         }}>
         <FlatList
           horizontal
@@ -370,8 +386,10 @@ const App = () => {
             <View style={styles.tabContent}>
               {activeTab === 'description' && (
                 <Animated.View
-                  exiting={FadeOutLeft.duration(durationAnimation)}
-                  entering={FadeInLeft.duration(durationAnimation).delay(150)}
+                  exiting={FadeOutLeft.duration(durationAnimation.DURATION_300)}
+                  entering={FadeInLeft.duration(
+                    durationAnimation.DURATION_300,
+                  ).delay(150)}
                   style={{marginBottom: 10}}>
                   <ScrollView
                     contentContainerStyle={{backgroundColor: 'white'}}>
@@ -383,8 +401,12 @@ const App = () => {
               )}
               {activeTab === 'image' && (
                 <Animated.View
-                  entering={FadeInRight.duration(durationAnimation).delay(150)}
-                  exiting={FadeOutRight.duration(durationAnimation)}
+                  entering={FadeInRight.duration(
+                    durationAnimation.DURATION_300,
+                  ).delay(150)}
+                  exiting={FadeOutRight.duration(
+                    durationAnimation.DURATION_300,
+                  )}
                   style={{marginBottom: 10}}>
                   <ScrollView style={styles.image_scroll_view}>
                     <ImageShow images={selectedLocation.image} />

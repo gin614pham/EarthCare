@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 import {getCurrentLocation} from '../api/googleMapAPI';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import Geolocation from '@react-native-community/geolocation';
 
 import Animated, {
   FadeInDown,
@@ -330,7 +329,7 @@ const AddActivityScreen = ({navigation}: any) => {
           durationAnimation.DELAY_6,
         )}>
         <TouchableOpacity style={styles.button} onPress={handleAddActivity}>
-          <Text style={styles.buttonText}>Add Activity</Text>
+          <Text style={styles.buttonText}>Register</Text>
         </TouchableOpacity>
       </Animated.View>
       <Modal
@@ -389,7 +388,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
   },
   button: {
-    backgroundColor: 'blue',
+    backgroundColor: '#35B6FF',
     borderRadius: 10,
     paddingVertical: 15,
     alignItems: 'center',
