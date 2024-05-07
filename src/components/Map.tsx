@@ -379,7 +379,22 @@ const App = () => {
           strokeColor="rgba(0, 0, 255, 0.5)"
           strokeWidth={2}
         />
-         */}
+        {/* {activivities.map((activity, index) =>
+          activity.location &&
+          activity.location.latitude &&
+          activity.location.longitude ? (
+            <Marker
+              key={index}
+              coordinate={{
+                latitude: activity.location.latitude,
+                longitude: activity.location.longitude,
+              }}
+              title={activity.name}
+              description={activity.description}
+              icon={require('../assets/icons/activity.png')}
+
+                        ) : null,
+        )} */}
       </MapView>
 
       <TouchableOpacity
