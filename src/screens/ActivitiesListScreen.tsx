@@ -24,7 +24,10 @@ const ActivitiesListScreen = ({navigation}: any) => {
 
   const loadActivities = async () => {
     const atv = await firestore().collection('activities').get();
-    const activities2 = atv.docs.map(doc => doc.data()) as Activity[];
+    const activities2 = atv.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    })) as Activity[];
     const currentDate = new Date();
     activities2.sort((a, b) => {
       const startDayA = new Date(a.startDateTime);

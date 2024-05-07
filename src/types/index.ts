@@ -14,6 +14,7 @@ export interface CarouselItems {
 
 export interface Activity {
   id: string;
+  userId: string;
   name: string;
   startDateTime: string;
   endDateTime: string;
