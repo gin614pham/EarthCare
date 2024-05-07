@@ -23,6 +23,7 @@ import Animated, {
 import {Activity, DayOfWeek, durationAnimation} from '../types';
 import {launchImageLibrary} from 'react-native-image-picker';
 import firestore from '@react-native-firebase/firestore';
+import storage from '@react-native-firebase/storage';
 import MapGoogle from '../components/MapGoogle';
 
 const AddActivityScreen = ({navigation}: any) => {
@@ -54,9 +55,22 @@ const AddActivityScreen = ({navigation}: any) => {
   const handlePressAddImage = async () => {
     const response: any = await launchImageLibrary({mediaType: 'photo'});
     if (!response.didCancel && response.assets) {
-      setActivityInfo({
-        ...activityInfo,
-        image: [response.assets[0].uri],
+      setIsImageLoading(true);
+      const image = response.assets[0];
+      const reference = storage().ref(`activities/${image.fileName}`);
+      const task = reference.putFile(image.uri);
+      task.on('state_changed', taskSnapshot => {
+        console.log(
+          `${taskSnapshot.bytesTransferred} transferred out of ${taskSnapshot.totalBytes}`,
+        );
+      });
+      task.then(async () => {
+        const url = await reference.getDownloadURL();
+        setActivityInfo({
+          ...activityInfo,
+          image: [...activityInfo.image, url],
+        });
+        setIsImageLoading(false);
       });
     }
   };
@@ -69,6 +83,8 @@ const AddActivityScreen = ({navigation}: any) => {
         .add({
           ...activityInfo,
           id: firestore().collection('activities').doc().id,
+          createdAt: firestore.FieldValue.serverTimestamp(),
+          updatedAt: firestore.FieldValue.serverTimestamp(),
         });
       navigation.goBack();
       ToastAndroid.show('Add activity success', ToastAndroid.SHORT);

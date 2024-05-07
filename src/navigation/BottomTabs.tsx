@@ -5,7 +5,7 @@ import Icon from 'react-native-vector-icons/AntDesign';
 import Icon2 from 'react-native-vector-icons/Feather';
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import SearchScreen from '../screens/SearchScreen';
+import NotificationScreen from '../screens/NotificationScreen';
 import ActivitiesListScreen from '../screens/ActivitiesListScreen';
 import LinearGradient from 'react-native-linear-gradient';
 import {navigationCustom} from './AppNavigation';
@@ -61,11 +61,11 @@ const BottomTabs = ({navigation}: any) => {
         }}
       />
       <Tab.Screen
-        name="Search"
-        component={SearchScreen}
+        name="Notification"
+        component={NotificationScreen}
         options={{
           tabBarIcon: ({color, size}) => (
-            <Icon name="search1" color={color} size={35} />
+            <Icon name="bells" color={color} size={35} />
           ),
         }}
       />
