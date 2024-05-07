@@ -64,3 +64,26 @@ export const DayOfWeek = {
   VI: ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'],
   JP: ['日', '月', '火', '水', '木', '金', '土'],
 };
+
+export const LOCATION_TYPES = [
+  {
+    label: 'Select location type',
+    value: '',
+    image: require('../assets/icons/location.png'),
+  },
+  {
+    label: 'Recycling Center',
+    value: 'Recycling Center',
+    image: require('../assets/icons/recycling-center.png'),
+  },
+  {
+    label: 'Garbage Dump',
+    value: 'Garbage Dump',
+    image: require('../assets/icons/trash1.png'),
+  },
+  {
+    label: 'Polluted Area',
+    value: 'Polluted Area',
+    image: require('../assets/icons/danger.png'),
+  },
+];

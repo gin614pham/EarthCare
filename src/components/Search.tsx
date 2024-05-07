@@ -29,7 +29,9 @@ const Search = ({handleGetLocation}) => {
     fetchPredictions();
   }, [search]);
 
-  const handleSelectPrediction = async prediction => {
+  const handleSelectPrediction = async (prediction: {
+    placePrediction: {placeId: any};
+  }) => {
     const placeId = prediction.placePrediction.placeId;
     try {
       const response = await getPlaceDetail(placeId);
