@@ -164,13 +164,6 @@ const AddLocationScreen = ({navigation}: any) => {
     );
   };
 
-  const handleDeleteImage = () => {
-    setLocationInfo(prevState => ({
-      ...prevState,
-      image: [],
-    }));
-  };
-
   const handleChange = (name: string, value: string) => {
     setLocationInfo(prevState => ({
       ...prevState,
