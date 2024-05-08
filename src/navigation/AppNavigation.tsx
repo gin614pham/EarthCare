@@ -38,7 +38,7 @@ const stack = [
   {
     name: 'EditProfile',
     component: EditProfileScreen,
-    options: {headerShown: true},
+    options: {headerShown: true, title: 'Edit Profile'},
     allowRoles: [ROLE.USER, ROLE.ADMIN, ROLE.VOLUNTEER],
   },
   {

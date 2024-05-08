@@ -79,7 +79,7 @@ const EditProfileScreen = ({navigation}: any) => {
   return (
     <LinearGradient colors={['#B4E0F9', '#FDFBFB']} style={{flex: 1}}>
       <View style={loginStyles.container}>
-        <Text style={loginStyles.header}>Edit Profile</Text>
+        {/* <Text style={loginStyles.header}>Edit Profile</Text> */}
         <TouchableOpacity onPress={selectImage}>
           {avatar === '' ? (
             <SkeletonPlaceholder>
