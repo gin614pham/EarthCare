@@ -24,6 +24,7 @@ import {
   CarouselItems,
   LOCATION_TYPES,
   Location,
+  MAP_TYPES,
   durationAnimation,
 } from '../types';
 import Search from './Search';
@@ -41,7 +42,6 @@ import Animated, {
 } from 'react-native-reanimated';
 import LottieView from 'lottie-react-native';
 import MapViewDirections from 'react-native-maps-directions';
-import {getDistance} from 'geolib';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -66,19 +66,16 @@ const App = () => {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const bottomSheetRef2 = useRef<BottomSheet>(null);
   const [destination, setDestination] = useState({
-    latitude: null,
-    longitude: null,
+    latitude: 0,
+    longitude: 0,
   });
-  const [durationToDestination, setDurationToDestination] = useState<
-    number | null
-  >(null);
+  const [durationToDestination, setDurationToDestination] = useState<number>(0);
 
   // thêm tích cho Chip
-  const [selectedChip, setSelectedChip] = useState([]);
+  const [selectedChip, setSelectedChip] = useState<string[]>([]);
   const [activivities, setActivities] = useState([]);
 
-  const [distanceToDestination, setDistanceToDestination] =
-    useState<string>('');
+  const [distanceToDestination, setDistanceToDestination] = useState<number>(0);
   const translateX = useSharedValue<number>(0);
 
   const animatedMoveStyle = useAnimatedStyle(() => ({
@@ -158,8 +155,8 @@ const App = () => {
   const handleMarkerPress = (location: Location) => {
     bottomSheetRef2.current?.close();
     setDestination({
-      latitude: null,
-      longitude: null,
+      latitude: 0,
+      longitude: 0,
     });
     setSelectedLocation(location);
     bottomSheetRef.current?.expand();
@@ -168,18 +165,18 @@ const App = () => {
   const handleGetDirection = () => {
     bottomSheetRef.current?.close();
     setDestination({
-      latitude: selectedLocation.latitude,
-      longitude: selectedLocation.longitude,
+      latitude: selectedLocation?.latitude || 0,
+      longitude: selectedLocation?.longitude || 0,
     });
 
     mapViewRef.current?.animateToRegion(
       {
-        latitude: (region.latitude + selectedLocation.latitude) / 2,
-        longitude: (region.longitude + selectedLocation.longitude) / 2,
+        latitude: (region.latitude + (selectedLocation?.latitude || 0)) / 2,
+        longitude: (region.longitude + (selectedLocation?.longitude || 0)) / 2,
         latitudeDelta:
-          Math.abs(region.latitude - selectedLocation.latitude) * 2,
+          Math.abs(region.latitude - (selectedLocation?.latitude || 0)) * 2,
         longitudeDelta:
-          Math.abs(region.longitude - selectedLocation.longitude) * 2,
+          Math.abs(region.longitude - (selectedLocation?.longitude || 0)) * 2,
       },
       1000,
     );
@@ -296,42 +293,7 @@ const App = () => {
         showsPointsOfInterest={false}
         showsCompass={false}
         region={region}
-        customMapStyle={[
-          {
-            featureType: 'administrative',
-            elementType: 'geometry',
-            stylers: [
-              {
-                visibility: 'off',
-              },
-            ],
-          },
-          {
-            featureType: 'poi',
-            stylers: [
-              {
-                visibility: 'off',
-              },
-            ],
-          },
-          {
-            featureType: 'road',
-            elementType: 'labels.icon',
-            stylers: [
-              {
-                visibility: 'off',
-              },
-            ],
-          },
-          {
-            featureType: 'transit',
-            stylers: [
-              {
-                visibility: 'off',
-              },
-            ],
-          },
-        ]}>
+        customMapStyle={MAP_TYPES}>
         {destination.latitude && destination.longitude ? (
           <MapViewDirections
             origin={{
@@ -359,12 +321,21 @@ const App = () => {
               }}
               title={location.address}
               description={location.description}
-              icon={
-                LOCATION_TYPES.find(x => x.value === location.locationType)
-                  ?.image
-              }
+              // icon={
+              //   require('../assets/icons/location.png')
+              //   // LOCATION_TYPES.find(x => x.value === location.locationType)
+              //   //   ?.image
+              // }
+              // style={{width: 10, height: 10}}
               onPress={() => handleMarkerPress(location)}>
-              <Callout>
+              <Image
+                source={
+                  LOCATION_TYPES.find(x => x.value === location.locationType)
+                    ?.image
+                }
+                style={{width: 32, height: 32}}
+              />
+              <Callout style={styles.callout}>
                 <Text>{location.locationType}</Text>
               </Callout>
             </Marker>
@@ -437,33 +408,39 @@ const App = () => {
         enablePanDownToClose>
         {selectedLocation && (
           <View style={styles.bottomSheetContent}>
-            <View style={{display: 'flex', flexDirection: 'row'}}>
+            <View style={styles.bottomSheetButton}>
               <TouchableOpacity
                 style={styles.findDirectionButton}
                 onPress={handleGetDirection}>
-                <Icon name="right" size={20} />
-                <Text>Đường đi</Text>
+                <Text>Đường đi </Text>
+                <Icon name="right" size={15} />
               </TouchableOpacity>
               <TouchableOpacity style={styles.findDirectionButton}>
-                <Icon name="message1" size={20} />
-                <Text>Nhắn tin</Text>
+                <Text>Nhắn tin </Text>
+                <Icon name="message1" size={15} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={handleCloseBottomSheet}>
+                {/* <Icon name="close" size={30} /> */}
+                <LottieView
+                  source={require('../assets/animations/close.json')}
+                  autoPlay
+                  loop={true}
+                  style={{width: 30, height: 30}}
+                />
               </TouchableOpacity>
             </View>
-            <Text style={styles.title}>Address:</Text>
-            <Text style={styles.addressBottomSheet}>
+
+            <Text
+              numberOfLines={3}
+              ellipsizeMode="tail"
+              style={styles.addressBottomSheet}>
+              <Text style={styles.title}>Address: </Text>
               {selectedLocation.address}
             </Text>
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={handleCloseBottomSheet}>
-              {/* <Icon name="close" size={30} /> */}
-              <LottieView
-                source={require('../assets/animations/close.json')}
-                autoPlay
-                loop={true}
-                style={{width: 60, height: 60}}
-              />
-            </TouchableOpacity>
+
+            <View style={styles.divider} />
 
             <View style={styles.tabContainer}>
               <TouchableOpacity
@@ -526,8 +503,11 @@ const App = () => {
                     durationAnimation.DURATION_300,
                   )}
                   style={{marginBottom: 10}}>
-                  <ScrollView style={styles.image_scroll_view}>
-                    <ImageShow images={selectedLocation.image} />
+                  <ScrollView
+                    contentContainerStyle={{backgroundColor: 'white'}}>
+                    <View style={styles.image_view}>
+                      <ImageShow images={selectedLocation.image} />
+                    </View>
                   </ScrollView>
                 </Animated.View>
               )}
@@ -543,16 +523,15 @@ const App = () => {
         {durationToDestination !== null && (
           <View>
             <Text style={styles.title}>
-              Khoảng cách: {distanceToDestination}
+              Distance: {distanceToDestination.toFixed(1) + ' km'}
             </Text>
             <Text style={styles.title}>
-              Thời gian đi đến: {durationToDestination}
+              Time to travel: {Math.round(durationToDestination) + ' min'}
             </Text>
-            {/* Nút đóng BottomSheet */}
+
             <TouchableOpacity
               style={styles.closeButton}
               onPress={handleCloseBottomSheet2}>
-              {/* <Icon name="close" size={30} /> */}
               <LottieView
                 source={require('../assets/animations/close.json')}
                 autoPlay
@@ -636,14 +615,13 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   bottomSheetContent: {
-    padding: 20,
-    paddingBottom: 200,
-    zIndex: 1000,
+    paddingHorizontal: 15,
+    paddingBottom: WINDOW_WIDTH * 0.5,
   },
   closeButton: {
     position: 'absolute',
     top: 0,
-    right: 10,
+    right: 5,
   },
   tabContainer: {
     flexDirection: 'row',
@@ -653,19 +631,18 @@ const styles = StyleSheet.create({
   },
   tabButton: {
     paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingTop: 0,
     borderRadius: 5,
     width: '50%',
     alignItems: 'center',
   },
-  tabContent: {},
+  tabContent: {
+    marginBottom: WINDOW_WIDTH * 0.25,
+  },
   tabText: {
     fontWeight: 'bold',
     fontSize: 14,
     color: 'gray',
-  },
-  image_scroll_view: {
-    marginBottom: 75,
   },
   moving_box: {
     width: (WINDOW_WIDTH - 40) / 2,
@@ -673,6 +650,13 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: 'blue',
     marginBottom: 10,
+  },
+  divider: {
+    marginTop: 5,
+    width: WINDOW_WIDTH - 40,
+    height: 1.25,
+    borderRadius: 20,
+    backgroundColor: 'gray',
   },
   title: {
     fontSize: 20,
@@ -684,14 +668,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'black',
   },
+  image_view: {
+    paddingBottom: 100,
+  },
   findDirectionButton: {
+    flexDirection: 'row',
     backgroundColor: 'white',
-    padding: 10,
     paddingHorizontal: 20,
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
     borderWidth: 1,
     borderColor: '#ccc',
     marginRight: 10,
@@ -699,8 +685,16 @@ const styles = StyleSheet.create({
   addressBottomSheet: {
     fontSize: 16,
     color: 'black',
-    marginBottom: 10,
     fontWeight: '400',
+  },
+  bottomSheetButton: {
+    display: 'flex',
+    flexDirection: 'row',
+    height: 40,
+  },
+  callout: {
+    width: 100,
+    backgroundColor: 'white',
   },
 });
 

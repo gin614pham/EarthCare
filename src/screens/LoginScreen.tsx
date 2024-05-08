@@ -6,6 +6,7 @@ import {
   View,
   Alert,
   Keyboard,
+  ToastAndroid,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import loginStyles from '../styles/loginStyle';
@@ -71,7 +72,7 @@ const LoginScreen = ({navigation}: any) => {
       });
       navigation.navigate('Map');
 
-      Alert.alert('Thành công', 'Đăng nhập thành công');
+      ToastAndroid.show('Login success', ToastAndroid.SHORT);
       // lặp qua từng user và thêm ngày tạo , ngày update
     } catch (error) {
       Alert.alert('Lỗi', error.message.replace(/\[.*?\]/, '').trim());
@@ -100,6 +101,7 @@ const LoginScreen = ({navigation}: any) => {
               onChangeText={text => handleChange('email', text)}
             />
             <TextInput
+              autoCapitalize="none"
               secureTextEntry
               style={loginStyles.input}
               placeholder="Password"

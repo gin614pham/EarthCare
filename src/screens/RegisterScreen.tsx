@@ -6,6 +6,7 @@ import {
   View,
   Alert,
   Keyboard,
+  ToastAndroid,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import loginStyles from '../styles/loginStyle';
@@ -69,7 +70,7 @@ const RegisterScreen = ({navigation}: any) => {
         avatar: 'none',
         name: registerForm.name,
       });
-      Alert.alert('Success', 'Register success');
+      ToastAndroid.show('Account created successfully', ToastAndroid.SHORT);
       navigation.navigate('Map');
     } catch (error) {
       Alert.alert('Error', error.message.replace(/\[.*?\]/, ''));
@@ -94,12 +95,14 @@ const RegisterScreen = ({navigation}: any) => {
               onChangeText={text => handleChange('name', text)}
             />
             <TextInput
+              autoCapitalize="none"
               style={loginStyles.input}
               placeholder="Email"
               value={registerForm.email}
               onChangeText={text => handleChange('email', text)}
             />
             <TextInput
+              autoCapitalize="none"
               secureTextEntry
               style={loginStyles.input}
               placeholder="Password"
@@ -107,6 +110,7 @@ const RegisterScreen = ({navigation}: any) => {
               onChangeText={text => handleChange('password', text)}
             />
             <TextInput
+              autoCapitalize="none"
               secureTextEntry
               style={loginStyles.input}
               placeholder="Confirm Password"

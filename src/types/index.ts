@@ -13,6 +13,7 @@ export interface CarouselItems {
 }
 
 export interface Activity {
+  id: string;
   name: string;
   startDateTime: string;
   endDateTime: string;
@@ -85,5 +86,42 @@ export const LOCATION_TYPES = [
     label: 'Polluted Area',
     value: 'Polluted Area',
     image: require('../assets/icons/danger.png'),
+  },
+];
+
+export const MAP_TYPES = [
+  {
+    featureType: 'administrative',
+    elementType: 'geometry',
+    stylers: [
+      {
+        visibility: 'off',
+      },
+    ],
+  },
+  {
+    featureType: 'poi',
+    stylers: [
+      {
+        visibility: 'off',
+      },
+    ],
+  },
+  {
+    featureType: 'road',
+    elementType: 'labels.icon',
+    stylers: [
+      {
+        visibility: 'off',
+      },
+    ],
+  },
+  {
+    featureType: 'transit',
+    stylers: [
+      {
+        visibility: 'off',
+      },
+    ],
   },
 ];

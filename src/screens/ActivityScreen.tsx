@@ -1,5 +1,12 @@
 import React, {useContext, useState, useEffect} from 'react';
-import {View, Text, Image, TouchableOpacity, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+} from 'react-native';
 import firestore from '@react-native-firebase/firestore';
 import UserContext from '../context/UserContext';
 
@@ -61,28 +68,32 @@ const ActivityScreen = ({route}: any) => {
 
   return (
     <View style={styles.container}>
-      <Image source={{uri: activity.image[0]}} style={styles.image} />
-      <Text style={styles.name}>{activity.name}</Text>
-      <Text style={styles.time}>
-        {activity.startDateTime} - {activity.endDateTime}
-      </Text>
-      <Text style={styles.time}>Thời gian bắt đầu: {activity.hoursStart}</Text>
-      <Text style={styles.addressTitle}>Địa chỉ:</Text>
-      <Text style={styles.address}>{activity.address}</Text>
-      <Text style={styles.descriptionTitle}>Mô tả</Text>
-      <Text style={styles.description}>{activity.description}</Text>
-      {!activityEnded ? (
-        <TouchableOpacity
-          style={styles.interestedButton}
-          onPress={handleInterestToggle}
-          disabled={activityEnded}>
-          <Text style={styles.interestedText}>
-            {interested ? 'Hủy quan tâm' : 'Quan tâm'}
-          </Text>
-        </TouchableOpacity>
-      ) : (
-        <Text style={styles.activityEndedText}>Đã kết thúc</Text>
-      )}
+      <ScrollView>
+        <Image source={{uri: activity.image[0]}} style={styles.image} />
+        <Text style={styles.name}>{activity.name}</Text>
+        <Text style={styles.time}>
+          {activity.startDateTime} - {activity.endDateTime}
+        </Text>
+        <Text style={styles.time}>
+          Thời gian bắt đầu: {activity.hoursStart}
+        </Text>
+        <Text style={styles.addressTitle}>Địa chỉ:</Text>
+        <Text style={styles.address}>{activity.address}</Text>
+        <Text style={styles.descriptionTitle}>Mô tả</Text>
+        <Text style={styles.description}>{activity.description}</Text>
+        {!activityEnded ? (
+          <TouchableOpacity
+            style={styles.interestedButton}
+            onPress={handleInterestToggle}
+            disabled={activityEnded}>
+            <Text style={styles.interestedText}>
+              {interested ? 'Hủy quan tâm' : 'Quan tâm'}
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <Text style={styles.activityEndedText}>Đã kết thúc</Text>
+        )}
+      </ScrollView>
     </View>
   );
 };

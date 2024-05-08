@@ -44,19 +44,19 @@ const stack = [
   {
     name: 'ActivityScreen',
     component: ActivityScreen,
-    options: {headerShown: true},
+    options: {headerShown: true, title: 'Activity Detail'},
     allowRoles: [ROLE.GUEST, ROLE.USER, ROLE.ADMIN, ROLE.VOLUNTEER],
   },
   {
     name: 'AddLocation',
     component: AddLocationScreen,
-    options: {headerShown: true},
+    options: {headerShown: true, title: 'Add Location'},
     allowRoles: [ROLE.USER, ROLE.ADMIN, ROLE.VOLUNTEER],
   },
   {
     name: 'AddActivityScreen',
     component: AddActivityScreen,
-    options: {headerShown: true},
+    options: {headerShown: true, title: 'Add Activity'},
     allowRoles: [ROLE.USER, ROLE.ADMIN, ROLE.VOLUNTEER],
   },
   {

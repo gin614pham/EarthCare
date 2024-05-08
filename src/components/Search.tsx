@@ -30,7 +30,9 @@ const Search = ({handleGetLocation}) => {
     const handleOutsidePress = event => {
       setPredictions([]);
       animatedHeight.value = withTiming(0, {duration: 300});
-      inputRef.current.blur();
+      if (inputRef.current) {
+        inputRef.current.blur();
+      }
     };
     Keyboard.addListener('keyboardDidHide', handleOutsidePress);
   }, []);
