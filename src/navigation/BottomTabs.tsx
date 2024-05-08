@@ -123,11 +123,11 @@ const BottomTabs = ({navigation}: any) => {
             <LinearGradient
               colors={['#B4E0F9', '#35B6FF']}
               style={styles.centerButton}>
-              <View style={styles.centerButton}>
+              <View>
                 <Icon
                   name="plus"
                   color="#fff"
-                  size={35}
+                  size={50}
                   style={{fontWeight: 'bold'}}
                 />
                 {/* <LottieView
@@ -193,8 +193,8 @@ const styles = StyleSheet.create({
   },
   centerButton: {
     backgroundColor: 'white',
-    width: 90,
-    height: 90,
+    width: 80,
+    height: 80,
     borderRadius: 50,
     justifyContent: 'center',
     alignItems: 'center',
