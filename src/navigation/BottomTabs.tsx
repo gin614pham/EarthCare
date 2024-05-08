@@ -75,18 +75,18 @@ const BottomTabs = ({navigation}: any) => {
         component={HomeScreen}
         options={{
           tabBarIcon: ({color, size}) => (
-            // <Icon2 name="map" color={color} size={35} />
+            <Icon2 name="map" color={color} size={35} />
             // <Image
             //   source={require('../assets/images/bottombar/map.png')}
             //   style={{width: 35, height: 35}}
             // />
 
-            <Animated.View style={animatedStyle}>
-              <Image
-                source={require('../assets/images/bottombar/map.png')}
-                style={{width: 35, height: 35}}
-              />
-            </Animated.View>
+            // <Animated.View style={animatedStyle}>
+            //   <Image
+            //     source={require('../assets/images/bottombar/map.png')}
+            //     style={{width: 35, height: 35}}
+            //   />
+            // </Animated.View>
           ),
         }}
       />
@@ -95,17 +95,17 @@ const BottomTabs = ({navigation}: any) => {
         component={NotificationScreen}
         options={{
           tabBarIcon: ({color, size}) => (
-            // <Icon name="bells" color={color} size={35} />
+            <Icon name="bells" color={color} size={35} />
             // <Image
             //   source={require('../assets/images/bottombar/notification.png')}
             //   style={{width: 35, height: 35}}
             // />
-            <Animated.View style={animatedStyle}>
-              <Image
-                source={require('../assets/images/bottombar/notification.png')}
-                style={{width: 35, height: 35}}
-              />
-            </Animated.View>
+            // <Animated.View style={animatedStyle}>
+            //   <Image
+            //     source={require('../assets/images/bottombar/notification.png')}
+            //     style={{width: 35, height: 35}}
+            //   />
+            // </Animated.View>
           ),
         }}
       />
@@ -120,24 +120,24 @@ const BottomTabs = ({navigation}: any) => {
             />
           ),
           tabBarIcon: ({focused, color, size}) => (
-            // <LinearGradient
-            //   colors={['#B4E0F9', '#35B6FF']}
-            //   style={styles.centerButton}>
-
-            <View style={styles.centerButton}>
-              {/* <Icon
+            <LinearGradient
+              colors={['#B4E0F9', '#35B6FF']}
+              style={styles.centerButton}>
+              <View style={styles.centerButton}>
+                <Icon
                   name="plus"
                   color="#fff"
                   size={35}
                   style={{fontWeight: 'bold'}}
-                /> */}
-              <LottieView
+                />
+                {/* <LottieView
                 source={require('../assets/animations/add.json')}
                 autoPlay
                 loop
                 style={{width: 110, height: 110}}
-              />
-            </View>
+              /> */}
+              </View>
+            </LinearGradient>
           ),
           tabBarLabel: () => null,
         }}
@@ -147,17 +147,17 @@ const BottomTabs = ({navigation}: any) => {
         component={ActivitiesListScreen}
         options={{
           tabBarIcon: ({color, size}) => (
-            // <Icon name="hearto" color={color} size={35} />
+            <Icon name="hearto" color={color} size={35} />
             // <Image
             //   source={require('../assets/images/bottombar/volunteer.png')}
             //   style={{width: 35, height: 35}}
             // />
-            <Animated.View style={animatedStyle}>
-              <Image
-                source={require('../assets/images/bottombar/volunteer.png')}
-                style={{width: 35, height: 35}}
-              />
-            </Animated.View>
+            // <Animated.View style={animatedStyle}>
+            //   <Image
+            //     source={require('../assets/images/bottombar/volunteer.png')}
+            //     style={{width: 35, height: 35}}
+            //   />
+            // </Animated.View>
           ),
         }}
       />
@@ -166,17 +166,17 @@ const BottomTabs = ({navigation}: any) => {
         component={ProfileScreen}
         options={{
           tabBarIcon: ({color, size}) => (
-            // <Icon name="user" color={color} size={35} />
+            <Icon name="user" color={color} size={35} />
             // <Image
             //   source={require('../assets/images/bottombar/profile.png')}
             //   style={{width: 35, height: 35}}
             // />
-            <Animated.View style={animatedStyle}>
-              <Image
-                source={require('../assets/images/bottombar/profile.png')}
-                style={{width: 35, height: 35}}
-              />
-            </Animated.View>
+            // <Animated.View style={animatedStyle}>
+            //   <Image
+            //     source={require('../assets/images/bottombar/profile.png')}
+            //     style={{width: 35, height: 35}}
+            //   />
+            // </Animated.View>
           ),
         }}
       />

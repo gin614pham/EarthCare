@@ -295,6 +295,7 @@ const App = () => {
         showsMyLocationButton={false}
         showsPointsOfInterest={false}
         showsCompass={false}
+        region={region}
         customMapStyle={[
           {
             featureType: 'administrative',
