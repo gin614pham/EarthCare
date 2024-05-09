@@ -21,6 +21,8 @@ import {FlatList, ScrollView} from 'react-native-gesture-handler';
 import {Chip} from 'react-native-paper';
 import Icon from 'react-native-vector-icons/AntDesign';
 import {
+  Activity,
+  CAROUSEL_ITEMS,
   CarouselItems,
   LOCATION_TYPES,
   Location,
@@ -56,9 +58,9 @@ const App = () => {
   });
   const mapViewRef = useRef<MapView>(null);
   const [locations, setLocations] = useState<Location[]>([]);
-  const [selectedLocation, setSelectedLocation] = useState<Location | null>(
-    null,
-  );
+  const [selectedLocation, setSelectedLocation] = useState<
+    Location | Activity | null
+  >(null);
   const [activeTab, setActiveTab] = useState('description');
   const [visible, setVisible] = useState(false);
   const snapPoints = useMemo(() => ['65%'], []);
@@ -72,9 +74,8 @@ const App = () => {
   });
   const [durationToDestination, setDurationToDestination] = useState<number>(0);
 
-  // thêm tích cho Chip
   const [selectedChip, setSelectedChip] = useState<string[]>([]);
-  const [activivities, setActivities] = useState([]);
+  const [activivities, setActivities] = useState<Activity[]>([]);
 
   const [distanceToDestination, setDistanceToDestination] = useState<number>(0);
   const translateX = useSharedValue<number>(0);
@@ -103,12 +104,13 @@ const App = () => {
   useEffect(() => {
     const unsubscribe = firestore()
       .collection('locations')
+      .where('approve', '==', true)
       .onSnapshot(snapshot => {
         const locations = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
         }));
-        setLocations(locations as any);
+        setLocations(locations as Location[]);
       });
 
     return () => unsubscribe();
@@ -117,14 +119,16 @@ const App = () => {
   useEffect(() => {
     const unsubscribe = firestore()
       .collection('activities')
+      .where('approve', '==', true)
       .onSnapshot(snapshot => {
         const activities = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data(),
         }));
-        setActivities(activities as any);
+        setActivities(activities as Activity[]);
       });
 
+    console.log('activities');
     return () => unsubscribe();
   }, []);
 
@@ -153,7 +157,7 @@ const App = () => {
     mapViewRef.current?.animateToRegion(newRegion, 200);
   };
 
-  const handleMarkerPress = (location: Location) => {
+  const handleMarkerPress = (location: Location | Activity) => {
     bottomSheetRef2.current?.close();
     setDestination({
       latitude: 0,
@@ -165,37 +169,55 @@ const App = () => {
 
   const handleGetDirection = () => {
     bottomSheetRef.current?.close();
-    setDestination({
-      latitude: selectedLocation?.latitude || 0,
-      longitude: selectedLocation?.longitude || 0,
-    });
 
-    mapViewRef.current?.animateToRegion(
-      {
-        latitude: (region.latitude + (selectedLocation?.latitude || 0)) / 2,
-        longitude: (region.longitude + (selectedLocation?.longitude || 0)) / 2,
-        latitudeDelta:
-          Math.abs(region.latitude - (selectedLocation?.latitude || 0)) * 2,
-        longitudeDelta:
-          Math.abs(region.longitude - (selectedLocation?.longitude || 0)) * 2,
-      },
-      1000,
-    );
+    // check selectedLocation is as Location
+    if (selectedLocation && 'latitude' in selectedLocation) {
+      setDestination({
+        latitude: selectedLocation?.latitude || 0,
+        longitude: selectedLocation?.longitude || 0,
+      });
 
-    // const distance = getDistance(
-    //   {
-    //     latitude: region.latitude,
-    //     longitude: region.longitude,
-    //   },
-    //   {
-    //     latitude: selectedLocation.latitude,
-    //     longitude: selectedLocation.longitude,
-    //   },
-    // );
-    // const duration = distance / 1000;
-    // setDurationToDestination(duration);
+      mapViewRef.current?.animateToRegion(
+        {
+          latitude: (region.latitude + (selectedLocation?.latitude || 0)) / 2,
+          longitude:
+            (region.longitude + (selectedLocation?.longitude || 0)) / 2,
+          latitudeDelta:
+            Math.abs(region.latitude - (selectedLocation?.latitude || 0)) * 2,
+          longitudeDelta:
+            Math.abs(region.longitude - (selectedLocation?.longitude || 0)) * 2,
+        },
+        1000,
+      );
 
-    bottomSheetRef2.current?.expand();
+      bottomSheetRef2.current?.expand();
+    } else if (selectedLocation && 'location' in selectedLocation) {
+      setDestination({
+        latitude: selectedLocation?.location?.latitude || 0,
+        longitude: selectedLocation?.location?.longitude || 0,
+      });
+
+      mapViewRef.current?.animateToRegion(
+        {
+          latitude:
+            (region.latitude + (selectedLocation?.location?.latitude || 0)) / 2,
+          longitude:
+            (region.longitude + (selectedLocation?.location?.longitude || 0)) /
+            2,
+          latitudeDelta:
+            Math.abs(
+              region.latitude - (selectedLocation?.location?.latitude || 0),
+            ) * 2,
+          longitudeDelta:
+            Math.abs(
+              region.longitude - (selectedLocation?.location?.longitude || 0),
+            ) * 2,
+        },
+        1000,
+      );
+
+      bottomSheetRef2.current?.expand();
+    }
   };
 
   const handleCloseBottomSheet = () => {
@@ -210,24 +232,6 @@ const App = () => {
     setMapType(mapType);
     setVisible(false);
   };
-
-  const carouselItems = [
-    {
-      id: 1,
-      title: 'Vị trí bị ô nhiễm',
-      icon: require('../assets/icons/danger.png'),
-    },
-    {
-      id: 2,
-      title: 'Vị trí đổ rác thải',
-      icon: require('../assets/icons/trash1.png'),
-    },
-    {
-      id: 3,
-      title: 'Vị trí tái chế rác',
-      icon: require('../assets/icons/recycling-center.png'),
-    },
-  ];
 
   const changeMinutesToHoursAndMinutes = (minutes: number) => {
     const hours = Math.floor(minutes / 60);
@@ -321,12 +325,6 @@ const App = () => {
               }}
               title={location.address}
               description={location.description}
-              // icon={
-              //   require('../assets/icons/location.png')
-              //   // LOCATION_TYPES.find(x => x.value === location.locationType)
-              //   //   ?.image
-              // }
-              // style={{width: 10, height: 10}}
               onPress={() => handleMarkerPress(location)}>
               <Image
                 source={
@@ -341,6 +339,28 @@ const App = () => {
             </Marker>
           ) : null,
         )}
+
+        {activivities.map((activity, index) =>
+          activity.location ? (
+            <Marker
+              key={index}
+              coordinate={{
+                latitude: activity.location.latitude,
+                longitude: activity.location.longitude,
+              }}
+              title={activity.name}
+              description={activity.description}
+              onPress={() => handleMarkerPress(activity)}>
+              <Image
+                source={require('../assets/icons/volunteer.png')}
+                style={{width: 32, height: 32}}
+              />
+              <Callout style={styles.callout}>
+                <Text>{activity.name}</Text>
+              </Callout>
+            </Marker>
+          ) : null,
+        )}
         <Circle
           center={{
             latitude: region.latitude,
@@ -351,22 +371,6 @@ const App = () => {
           strokeColor="rgba(0, 0, 255, 0.5)"
           strokeWidth={2}
         />
-        {/* {activivities.map((activity, index) =>
-          activity.location &&
-          activity.location.latitude &&
-          activity.location.longitude ? (
-            <Marker
-              key={index}
-              coordinate={{
-                latitude: activity.location.latitude,
-                longitude: activity.location.longitude,
-              }}
-              title={activity.name}
-              description={activity.description}
-              icon={require('../assets/icons/activity.png')}
-
-                        ) : null,
-        )} */}
       </MapView>
 
       <TouchableOpacity
@@ -394,7 +398,7 @@ const App = () => {
         }}>
         <FlatList
           horizontal
-          data={carouselItems}
+          data={CAROUSEL_ITEMS}
           renderItem={renderCarouselItem}
           keyExtractor={item => item.title}
           showsHorizontalScrollIndicator={false}
@@ -488,8 +492,21 @@ const App = () => {
                   style={{marginBottom: 10}}>
                   <ScrollView
                     contentContainerStyle={{backgroundColor: 'white'}}>
+                    {selectedLocation && 'name' in selectedLocation && (
+                      <Text style={styles.title_bottom_sheet}>
+                        {selectedLocation.name}
+                      </Text>
+                    )}
                     <Text style={styles.description}>
                       {selectedLocation.description}
+                      {'startDateTime' in selectedLocation
+                        ? '\n\n\nDate Start :' +
+                          selectedLocation.startDateTime +
+                          ' - ' +
+                          selectedLocation.endDateTime +
+                          '\nTime Start :' +
+                          selectedLocation.hoursStart
+                        : ''}
                     </Text>
                   </ScrollView>
                 </Animated.View>
@@ -542,34 +559,10 @@ const App = () => {
           </View>
         )}
       </BottomSheet>
-      {/* <TouchableOpacity
-        style={{
-          position: 'absolute',
-          bottom: 135,
-          left: 20,
-          borderRadius: 20,
-          backgroundColor: 'white',
-          padding: 10,
-          display: 'flex',
-          flexDirection: 'row',
-          zIndex: 1,
-        }}
-        onPress={() => setVisible(!visible)}>
-        <Text
-          style={{
-            fontSize: 13,
-            fontWeight: '600',
-          }}>
-          Gần bạn có gì?
-        </Text>
-
-        <Icon name="down" size={20} />
-      </TouchableOpacity> */}
       <ChangeMapType
         mapType={mapType}
         handleChangeMapType={handleChangeMapType}
       />
-      {/* <View style={{position: 'absolute', top: 60, right: 20}}></View> */}
     </View>
   );
 };
@@ -662,6 +655,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: 'bold',
     color: 'black',
+  },
+  title_bottom_sheet: {
+    fontSize: 25,
+    fontWeight: 'bold',
+    color: 'black',
+    textAlign: 'center',
   },
   description: {
     paddingBottom: 100,

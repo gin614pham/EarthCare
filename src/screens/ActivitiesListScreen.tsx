@@ -1,5 +1,12 @@
 import React, {useEffect, useState} from 'react';
-import {Text, View, TouchableOpacity, Image, StyleSheet} from 'react-native';
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
+  FlatList,
+} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import LoadingContext from '../context/LoadingContext';
 import {SafeAreaView} from 'react-native-safe-area-context';
@@ -115,7 +122,7 @@ const ActivitiesListScreen = ({navigation}: any) => {
         style={activityStyles.background_container}>
         <View style={activityStyles.container}>
           <Text style={activityStyles.header}>Activities</Text>
-          <Animated.FlatList
+          <FlatList
             data={activities}
             renderItem={({item, index}) => renderItem({item, index})}
             keyExtractor={item => item.id}

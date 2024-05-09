@@ -75,11 +75,12 @@ const AddActivityScreen = ({navigation}: any) => {
 
   const handleAddActivity = async () => {
     Keyboard.dismiss();
+    const {id, ...infoWithoutId} = activityInfo;
     try {
       await firestore()
         .collection('activities')
         .add({
-          ...activityInfo,
+          ...infoWithoutId,
           createdAt: firestore.FieldValue.serverTimestamp(),
           updatedAt: firestore.FieldValue.serverTimestamp(),
           approve: false,
