@@ -1,4 +1,5 @@
 export interface Location {
+  id: string;
   address: string;
   description: string;
   image: string[];
@@ -123,5 +124,23 @@ export const MAP_TYPES = [
         visibility: 'off',
       },
     ],
+  },
+];
+
+export const CAROUSEL_ITEMS = [
+  {
+    id: 1,
+    title: 'Vị trí bị ô nhiễm',
+    icon: require('../assets/icons/danger.png'),
+  },
+  {
+    id: 2,
+    title: 'Vị trí đổ rác thải',
+    icon: require('../assets/icons/trash1.png'),
+  },
+  {
+    id: 3,
+    title: 'Vị trí tái chế rác',
+    icon: require('../assets/icons/recycling-center.png'),
   },
 ];
