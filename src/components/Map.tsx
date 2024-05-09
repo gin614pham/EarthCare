@@ -42,6 +42,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import LottieView from 'lottie-react-native';
 import MapViewDirections from 'react-native-maps-directions';
+import Config from 'react-native-config';
 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
@@ -300,7 +301,7 @@ const App = () => {
               longitude: region.longitude,
             }}
             destination={destination}
-            apikey="AIzaSyDSg64UIA8bLIMCVfGc4vB5n_lrQRZHtYQ"
+            apikey={Config.GOOGLE_MAPS_API_KEY}
             strokeWidth={4}
             strokeColor="rgb(0,139,241)"
             mode="DRIVING"
