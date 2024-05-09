@@ -3,24 +3,29 @@ import {NavigationContainer} from '@react-navigation/native';
 import AppNavigation from './navigation/AppNavigation';
 import auth from '@react-native-firebase/auth';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
-import {StatusBar} from 'react-native';
+import {Platform, StatusBar} from 'react-native';
 import LoadingScreen from './screens/other/LoadingScreen';
 import LoadingContext from './context/LoadingContext';
 import UserContext from './context/UserContext';
 import firestore from '@react-native-firebase/firestore';
 import {PaperProvider} from 'react-native-paper';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-import BackgroundFetch from 'react-native-background-fetch'; // Import thư viện BackgroundFetch
 // import notifee, {
 //   AndroidImportance,
 //   AndroidVisibility,
 // } from '@notifee/react-native'; // Import thư viện notifee
 import PushNotification from 'react-native-push-notification';
-import messaging from '@react-native-firebase/messaging';
+import SplashScreen from 'react-native-splash-screen';
 
 function App(): JSX.Element {
   const [user, setUser] = useState<any>({});
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      SplashScreen.hide();
+    }
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
