@@ -42,25 +42,19 @@ const LoginScreen = ({navigation}: any) => {
         .doc(userCredentials.user.uid)
         .get();
       const token = await messaging().getToken();
-      const userToken = await firestore()
+
+      const userTokens = await firestore().collection('user-tokens').get();
+      userTokens.docs.forEach(async doc => {
+        if (doc.data().token === token) {
+          await firestore().collection('user-tokens').doc(doc.id).delete();
+        }
+      });
+      await firestore()
         .collection('user-tokens')
         .doc(userCredentials.user.uid)
-        .get();
-      if (!userToken.exists) {
-        await firestore()
-          .collection('user-tokens')
-          .doc(userCredentials.user.uid)
-          .set({
-            token: token,
-          });
-      } else {
-        await firestore()
-          .collection('user-tokens')
-          .doc(userCredentials.user.uid)
-          .update({
-            token: token,
-          });
-      }
+        .set({
+          token: token,
+        });
 
       setUser({
         uid: userCredentials.user.uid,
@@ -79,6 +73,7 @@ const LoginScreen = ({navigation}: any) => {
       setIsLoading(false);
     }
   };
+
   const handleChange = (name: string, value: string) => {
     setLoginForm({...loginForm, [name]: value});
   };

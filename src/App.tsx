@@ -11,10 +11,11 @@ import firestore from '@react-native-firebase/firestore';
 import {PaperProvider} from 'react-native-paper';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import BackgroundFetch from 'react-native-background-fetch'; // Import thư viện BackgroundFetch
-import notifee, {
-  AndroidImportance,
-  AndroidVisibility,
-} from '@notifee/react-native'; // Import thư viện notifee
+// import notifee, {
+//   AndroidImportance,
+//   AndroidVisibility,
+// } from '@notifee/react-native'; // Import thư viện notifee
+import PushNotification from 'react-native-push-notification';
 import messaging from '@react-native-firebase/messaging';
 
 function App(): JSX.Element {
@@ -110,6 +111,32 @@ function App(): JSX.Element {
   //   await onDisplayNotification();
   // };
 
+  //config push notification message remote firebase
+  useEffect(() => {
+    PushNotification.configure({
+      onRegister: function (token) {
+        console.log('TOKEN:', token);
+      },
+      onNotification: function (notification) {
+        console.log('NOTIFICATION:', notification);
+      },
+      onAction: function (notification) {
+        console.log('ACTION:', notification.action);
+        console.log('NOTIFICATION:', notification);
+      },
+      onRegistrationError: function (err) {
+        console.error(err.message, err);
+      },
+      permissions: {
+        alert: true,
+        badge: true,
+        sound: true,
+      },
+      popInitialNotification: true,
+      requestPermissions: true,
+    });
+  }, []);
+
   const theme = {
     dark: false,
     colors: {
@@ -121,6 +148,34 @@ function App(): JSX.Element {
       notification: 'rgb(0, 122, 255)',
     },
   };
+  // config message notification remote firebase and chạy ngầm
+
+  // useEffect(() => {
+  //   const unsubscribe = messaging().onMessage(async remoteMessage => {
+  //     const channelId = await notifee.createChannel({
+  //       id: 'important',
+  //       name: 'Important Notifications',
+  //       importance: AndroidImportance.HIGH,
+  //       lights: true,
+  //       vibration: true,
+  //       visibility: AndroidVisibility.PUBLIC,
+  //     });
+
+  //     await notifee.displayNotification({
+  //       title: remoteMessage.notification?.title,
+  //       body: remoteMessage.notification?.body,
+  //       android: {
+  //         channelId,
+  //         smallIcon: 'ic_launcher', // optional, defaults to 'ic_launcher'
+  //         pressAction: {
+  //           id: 'default',
+  //         },
+  //       },
+  //     });
+  //   });
+
+  //   return unsubscribe;
+  // }, []);
 
   return (
     <GestureHandlerRootView>

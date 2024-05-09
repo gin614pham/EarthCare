@@ -34,7 +34,7 @@ export const getSearchResults = async (search: string) => {
 
     return response.data.suggestions;
   } catch (error) {
-    Alert.alert('Error', 'Failed to get search results');
+    Alert.alert('Error', error);
   }
 };
 
@@ -45,6 +45,6 @@ export const getPlaceDetail = async (placeId: string) => {
 
     return response.data;
   } catch (error) {
-    Alert.alert('Error', 'Failed to get place details');
+    Alert.alert('Error', error);
   }
 };

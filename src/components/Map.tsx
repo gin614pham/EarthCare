@@ -293,7 +293,6 @@ const App = () => {
         mapType={mapType}
         showsUserLocation
         showsMyLocationButton={false}
-        showsPointsOfInterest={false}
         showsCompass={false}
         region={region}
         customMapStyle={[
