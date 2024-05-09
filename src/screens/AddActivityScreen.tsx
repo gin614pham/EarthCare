@@ -30,6 +30,7 @@ import LoadingContext from '../context/LoadingContext';
 
 const AddActivityScreen = ({navigation}: any) => {
   const [activityInfo, setActivityInfo] = useState<Activity>({
+    id: '',
     name: '',
     startDateTime: '',
     endDateTime: '',
@@ -81,6 +82,7 @@ const AddActivityScreen = ({navigation}: any) => {
           ...activityInfo,
           createdAt: firestore.FieldValue.serverTimestamp(),
           updatedAt: firestore.FieldValue.serverTimestamp(),
+          approve: false,
         });
       navigation.goBack();
       ToastAndroid.show('Add activity success', ToastAndroid.SHORT);

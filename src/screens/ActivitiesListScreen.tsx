@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Text, View, TouchableOpacity, Image, StyleSheet} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import LoadingContext from '../context/LoadingContext';
@@ -15,18 +15,30 @@ const ActivitiesListScreen = ({navigation}: any) => {
   const [activities, setActivities] = useState<Activity[]>([]);
   const {user} = React.useContext(UserContext);
 
+  const parseDate = (date: string) => {
+    const parts = date.split(',')[1].split('/');
+    return new Date(
+      parseInt(parts[2]),
+      parseInt(parts[1]) - 1,
+      parseInt(parts[0]),
+    );
+  };
+
   const loadActivities = async () => {
-    const atv = await firestore().collection('activities').get();
+    const atv = await firestore()
+      .collection('activities')
+      .where('approve', '==', true)
+      .get();
     const activities2 = atv.docs.map(doc => ({
       id: doc.id,
       ...doc.data(),
-    }));
+    })) as Activity[];
     const currentDate = new Date();
     activities2.sort((a, b) => {
-      const startDayA = new Date(a.startDateTime);
-      const startDayB = new Date(b.startDateTime);
-      const endDayA = new Date(a.endDateTime);
-      const endDayB = new Date(b.endDateTime);
+      const startDayA = parseDate(a.startDateTime);
+      const startDayB = parseDate(b.startDateTime);
+      const endDayA = parseDate(a.endDateTime);
+      const endDayB = parseDate(b.endDateTime);
 
       const isActivityActiveA =
         startDayA <= currentDate && endDayA >= currentDate;
@@ -40,32 +52,38 @@ const ActivitiesListScreen = ({navigation}: any) => {
         ? -1
         : isActivityActiveB && !isActivityActiveA
         ? 1
-        : isActivityActiveA && isActivityActiveB
-        ? 0
+        : isActivityActiveA && isActivityActiveB && endDayA < endDayB
+        ? -1
+        : isActivityActiveA && isActivityActiveB && endDayA > endDayB
+        ? 1
         : isActivityPastA && !isActivityPastB
         ? 1
         : isActivityPastB && !isActivityPastA
         ? -1
-        : isActivityPastA && isActivityPastB
-        ? 0
+        : isActivityPastA && isActivityPastB && endDayA < endDayB
+        ? 1
+        : isActivityPastA && isActivityPastB && endDayA > endDayB
+        ? -1
         : isActivityFutureA && !isActivityFutureB
         ? -1
         : isActivityFutureB && !isActivityFutureA
         ? 1
-        : isActivityFutureA && isActivityFutureB
-        ? 0
+        : isActivityFutureA && isActivityFutureB && startDayA < startDayB
+        ? -1
+        : isActivityFutureA && isActivityFutureB && startDayA > startDayB
+        ? 1
         : 0;
     });
     setActivities(activities2);
   };
 
-  useFocusEffect(
-    React.useCallback(() => {
-      setIsLoading(true);
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
       loadActivities();
-      setIsLoading(false);
-    }, []),
-  );
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   const renderItem = ({item, index}: {item: Activity; index: number}) => (
     <Animated.View entering={FadeInDown.duration(1000).delay(index * 150)}>
@@ -79,8 +97,10 @@ const ActivitiesListScreen = ({navigation}: any) => {
           style={activityStyles.activityImage}
         />
         <View style={activityStyles.activityInfo}>
-          <Text style={activityStyles.activityName}>{item.name}</Text>
-          <Text style={activityStyles.activityDescription}>
+          <Text numberOfLines={2} style={activityStyles.activityName}>
+            {item.name}
+          </Text>
+          <Text numberOfLines={3} style={activityStyles.activityDescription}>
             {item.description}
           </Text>
         </View>
@@ -165,6 +185,8 @@ const activityStyles = StyleSheet.create({
   },
   activityInfo: {
     flex: 1,
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
   activityName: {
     fontSize: 18,

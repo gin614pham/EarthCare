@@ -1,4 +1,4 @@
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import React, {useEffect} from 'react';
 import auth from '@react-native-firebase/auth';
 import ProfileScreen2 from './ProfileScreen2';
@@ -26,9 +26,16 @@ const ProfileScreen = ({navigation}: any) => {
           {role ? (
             <ProfileScreen2 navigation={navigation} />
           ) : (
-            <View>
-              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                <Text> Login </Text>
+            <View style={styles.container_not_login}>
+              <Image
+                source={require('../assets/icons/account.png')}
+                style={{width: 100, height: 100}}
+              />
+              <Text style={styles.label_text}>Please login to continue</Text>
+              <TouchableOpacity
+                style={loginStyles.button}
+                onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.button_text}> Login </Text>
               </TouchableOpacity>
             </View>
           )}
@@ -45,5 +52,21 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  container_not_login: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 20,
+  },
+  label_text: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'black',
+  },
+  button_text: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: 'bold',
   },
 });
