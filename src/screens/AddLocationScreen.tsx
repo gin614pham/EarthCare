@@ -11,6 +11,7 @@ import {
   Platform,
   ActivityIndicator,
   ScrollView,
+  ToastAndroid,
 } from 'react-native';
 import loginStyles from '../styles/loginStyle';
 import firestore from '@react-native-firebase/firestore';
@@ -30,6 +31,7 @@ import Animated, {
 
 const AddLocationScreen = ({navigation}: any) => {
   const [locationInfo, setLocationInfo] = useState<Location>({
+    id: '',
     address: '',
     description: '',
     image: [],
@@ -86,15 +88,17 @@ const AddLocationScreen = ({navigation}: any) => {
     try {
       locationInfo.latitude = locationAdd.latitude;
       locationInfo.longitude = locationAdd.longitude;
+      const {id, ...infoWithoutId} = locationInfo;
       const docRef = await firestore().collection('locations').doc(); // Tạo một ID mới
       await docRef.set({
-        ...locationInfo,
+        ...infoWithoutId,
         userId: user.uid,
         createdAt: firestore.FieldValue.serverTimestamp(),
         updatedAt: firestore.FieldValue.serverTimestamp(),
+        approve: false,
       });
 
-      Alert.alert('Success', 'Location added successfully');
+      ToastAndroid.show('Location added successfully', ToastAndroid.SHORT);
       navigation.navigate('BottomTabs');
     } catch (error) {
       Alert.alert('Error', 'Failed to add location' + '\n' + error);
@@ -103,9 +107,9 @@ const AddLocationScreen = ({navigation}: any) => {
 
   const handleChooseImage = () => {
     ImagePicker.openPicker({
-      width: 300,
-      height: 400,
-      cropping: true,
+      width: 800,
+      height: 800,
+      cropping: false,
     }).then(async image => {
       setLocationInfo(prevState => ({
         ...prevState,

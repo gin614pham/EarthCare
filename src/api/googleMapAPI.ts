@@ -7,16 +7,17 @@ export const getCurrentLocation = async (
   longitude: number,
 ) => {
   try {
-    if (Config.GOOGLE_MAPS_API_KEY === '') {
+    if (Config.GOOGLE_API_KEY_LOCALE === '') {
       throw new Error('Google Maps API key is not set');
     }
-    const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&lang=vi&apiKey=ab197e6b8d6f4781b067992462e140eb`;
+    const url = `https://api.geoapify.com/v1/geocode/reverse?lat=${latitude}&lon=${longitude}&lang=vi&apiKey=${Config.GOOGLE_API_KEY_LOCALE}`;
     const response = await axios.get(url);
     if (response.data.status === 'ZERO_RESULTS') {
       throw new Error('No results found');
     }
     return response.data.features[0].properties.formatted;
   } catch (error) {
+    console.log(error);
     Alert.alert('Lỗi', 'Không thể lấy vị trí hiện tại');
   }
 };
